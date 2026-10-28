@@ -1,0 +1,2587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>زايد | Zayed - لعبة المزادات والتقييم</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo, Inter & Dot-Matrix (Doto / Silkscreen) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Doto:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                        dot: ['Doto', 'Silkscreen', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --widget-bg: rgba(20, 20, 19, 0.94);
+            --widget-inner: rgba(28, 28, 26, 0.95);
+            --widget-border: rgba(255, 255, 255, 0.09);
+            --text-primary: #ffffff;
+            --text-muted: #8e8d8a;
+        }
+        html, body {
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: 'Inter', 'Cairo', sans-serif;
+            background-color: #7c7d75;
+            background-image:
+                radial-gradient(circle at 12% 18%, rgba(215, 212, 204, 0.75) 0%, transparent 45%),
+                radial-gradient(circle at 85% 12%, rgba(28, 42, 46, 0.85) 0%, transparent 48%),
+                radial-gradient(circle at 50% 55%, rgba(98, 104, 88, 0.65) 0%, transparent 55%),
+                radial-gradient(circle at 80% 85%, rgba(44, 39, 62, 0.85) 0%, transparent 50%),
+                radial-gradient(circle at 18% 88%, rgba(82, 94, 72, 0.75) 0%, transparent 45%);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+        [dir="rtl"] body {
+            font-family: 'Cairo', 'Inter', sans-serif;
+        }
+        /* Matte Black Squircle Widget Card matching the reference image */
+        .glass-panel {
+            background: var(--widget-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 24px;
+            border: 1px solid var(--widget-border);
+            box-shadow:
+                0 16px 32px -10px rgba(0, 0, 0, 0.55),
+                inset 0 1px 1px rgba(255, 255, 255, 0.12);
+        }
+        .widget-subcard {
+            background: var(--widget-inner);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        /* Dot-Matrix LED Typography */
+        .dot-matrix {
+            font-family: 'Doto', 'Silkscreen', monospace;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.22);
+            line-height: 1;
+        }
+        /* Micro Icon Pill on the right of numbers */
+        .metric-pill {
+            background: #0b0b0a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            padding: 4px 8px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            min-width: 32px;
+        }
+        /* Tick Ruler Bar at the bottom of widgets */
+        .tick-ruler {
+            background-image: repeating-linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0.18) 0px,
+                rgba(255, 255, 255, 0.18) 1.5px,
+                transparent 1.5px,
+                transparent 8px
+            );
+            height: 7px;
+        }
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.65; transform: scale(1.03); }
+        }
+        .timer-urgent {
+            animation: pulse-fast 0.45s infinite;
+        }
+        @keyframes gavel-hit {
+            0% { transform: rotate(0deg) scale(1); }
+            40% { transform: rotate(-25deg) scale(1.15); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+        .gavel-anim {
+            animation: gavel-hit 0.5s ease-out;
+        }
+        /* Monochrome SVG styling inside item showcase */
+        #itemSvgContainer svg, #myInventoryGrid svg, #votingBuildsGrid svg {
+            filter: grayscale(100%) contrast(135%) brightness(1.15);
+        }
+        /* Subtle internal scrollbars only when needed inside a widget */
+        .internal-scroll::-webkit-scrollbar {
+            width: 3px;
+            height: 3px;
+        }
+        .internal-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .internal-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="selection:bg-white selection:text-black p-2 sm:p-3.5 gap-2 sm:gap-2.5 max-w-md md:max-w-5xl mx-auto">
+
+    <!-- Top Navigation Bar (Mobile-First Status & Action Header) -->
+    <header class="shrink-0 w-full">
+        <div class="glass-panel px-3.5 py-2 flex items-center justify-between gap-2">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-2 cursor-pointer" onclick="window.app.confirmLeaveRoom()">
+                <div class="w-8 h-8 rounded-xl bg-black border border-white/15 flex items-center justify-center text-white text-xs">
+                    <i class="fa-solid fa-gavel"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-bold tracking-tight text-white leading-none" data-i18n="appTitle">زايد</h1>
+                    <p class="text-[9px] text-[#8e8d8a] mt-0.5" data-i18n="appSubtitle">لعبة المزادات والتقييم</p>
+                </div>
+            </div>
+
+            <!-- Active Room Badge (Compact Pill for Mobile) -->
+            <div id="headerRoomBadge" class="hidden items-center gap-1.5 bg-black/90 border border-white/10 px-2.5 py-1 rounded-full">
+                <span class="text-[9px] text-[#8e8d8a] hidden sm:inline" data-i18n="roomCodeLabel">كود:</span>
+                <span id="headerRoomCode" class="dot-matrix text-xs sm:text-sm text-white tracking-widest">----</span>
+                <button onclick="window.app.copyRoomCode()" class="text-[#8e8d8a] hover:text-white transition px-0.5" title="Copy">
+                    <i class="fa-regular fa-copy text-[11px]"></i>
+                </button>
+            </div>
+
+            <!-- Controls: Sound, How to Play, Language Switcher -->
+            <div class="flex items-center gap-1">
+                <button id="soundToggleBtn" onclick="window.app.toggleSound()" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/80 hover:bg-black text-white border border-white/10 flex items-center justify-center transition" title="Toggle Sound">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-[10px]"></i>
+                </button>
+                <button onclick="window.app.openRulesModal()" class="w-7 h-7 sm:w-auto sm:px-2.5 sm:py-1 rounded-full bg-black/80 hover:bg-black text-white border border-white/10 text-[11px] font-medium flex items-center justify-center gap-1 transition">
+                    <i class="fa-regular fa-circle-question text-[#8e8d8a] text-xs"></i>
+                    <span class="hidden sm:inline" data-i18n="howToPlayBtn">طريقة اللعب</span>
+                </button>
+                <button id="langSwitchBtn" onclick="window.app.toggleLanguage()" class="px-2.5 py-1 rounded-full bg-white text-black hover:bg-neutral-200 font-bold text-[11px] flex items-center gap-1 transition">
+                    <i class="fa-solid fa-globe text-[10px]"></i>
+                    <span id="langSwitchText">EN</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-1.5 pointer-events-none w-full max-w-xs px-3"></div>
+
+    <!-- Main Mobile-First Viewport Container (Zero Page Scroll) -->
+    <main class="flex-1 min-h-0 w-full relative overflow-hidden">
+
+        <!-- ==================== SCREEN 1: HOME / ENTRY (MOBILE-FIRST BENTO STACK) ==================== -->
+        <section id="screenHome" class="h-full w-full flex flex-col md:grid md:grid-cols-12 gap-2 sm:gap-3 overflow-hidden">
+            
+            <!-- Top Row on Mobile / Left Column on Desktop: 2 Square Reference Widgets + Theme Bar -->
+            <div class="shrink-0 md:col-span-7 flex flex-col gap-2 sm:gap-3 md:h-full min-h-0">
+                <!-- 2 Side-by-Side Square Bento Widgets (Visible on Mobile AND Desktop!) -->
+                <div class="grid grid-cols-2 gap-2 sm:gap-3 md:flex-1 min-h-0">
+                    <!-- Widget A: 5s Blitz Timer (Like "Activity 52" in photo) -->
+                    <div class="glass-panel p-3 sm:p-5 flex flex-col justify-between">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="text-xs sm:text-base font-medium text-white leading-tight" data-i18n="cat_cars">تعديل السيارات</div>
+                                <div class="text-[9px] sm:text-[11px] text-[#8e8d8a]">blitz timer</div>
+                            </div>
+                            <span class="text-[9px] text-[#8e8d8a] font-mono">01/04</span>
+                        </div>
+                        <div class="flex items-center justify-between my-1.5 sm:my-auto">
+                            <div class="dot-matrix text-3xl sm:text-5xl">05</div>
+                            <div class="metric-pill">
+                                <i class="fa-solid fa-bolt text-white text-[10px]"></i>
+                                <span class="text-[8px] text-[#8e8d8a] font-mono">sec</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="tick-ruler w-full mb-1 flex items-center justify-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-white inline-block"></span>
+                                <span class="w-2 h-1.5 bg-white inline-block"></span>
+                                <span class="w-1 h-1.5 bg-white inline-block"></span>
+                            </div>
+                            <div class="flex justify-between text-[8px] sm:text-[10px] text-[#8e8d8a] font-mono">
+                                <span>START</span>
+                                <span>5.0 SEC</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget B: AI Judge +2 (Like "Sleep time 7:45" in photo) -->
+                    <div class="glass-panel p-3 sm:p-5 flex flex-col justify-between">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="text-xs sm:text-base font-medium text-white leading-tight" data-i18n="aiJudgeShort">الحكم الذكي</div>
+                                <div class="text-[9px] sm:text-[11px] text-[#8e8d8a]">AI Judge</div>
+                            </div>
+                            <span class="text-[9px] text-[#8e8d8a] font-mono">VOTE</span>
+                        </div>
+                        <div class="flex items-center justify-between my-1.5 sm:my-auto">
+                            <div class="dot-matrix text-3xl sm:text-5xl">+2</div>
+                            <div class="metric-pill">
+                                <i class="fa-solid fa-wand-magic-sparkles text-white text-[10px]"></i>
+                                <span class="text-[8px] text-[#8e8d8a] font-mono">pts</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="w-full h-1.5 flex items-end gap-0.5 mb-1">
+                                <div class="h-0.5 flex-1 bg-white/20"></div>
+                                <div class="h-1.5 flex-1 bg-white"></div>
+                                <div class="h-2 flex-1 bg-white"></div>
+                                <div class="h-1 flex-1 bg-white"></div>
+                                <div class="h-0.5 flex-1 bg-white/20"></div>
+                            </div>
+                            <div class="flex justify-between text-[8px] sm:text-[10px] text-[#8e8d8a] font-mono">
+                                <span>PLAYER: 1</span>
+                                <span>AI: +2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wide Middle Widget: 4 Themes Telemetry Strip (Like "Heart Rate 61" in photo) -->
+                <div class="glass-panel p-3 sm:p-5 flex flex-col justify-between md:flex-1 min-h-0">
+                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                        <div class="min-w-0">
+                            <h2 class="text-xs sm:text-base font-medium text-white truncate" data-i18n="heroHeadline">
+                                زايد بذكاء، اصنع مجموعتك، واكسب تصويت الجميع!
+                            </h2>
+                            <p class="text-[10px] text-[#8e8d8a] truncate" data-i18n="heroDescription">
+                                4 فئات للمزاد • ميزانية متساوية • تقييم الذكاء الاصطناعي
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="dot-matrix text-2xl sm:text-4xl">40</span>
+                            <div class="metric-pill">
+                                <i class="fa-solid fa-layer-group text-white text-[9px]"></i>
+                                <span class="text-[8px] text-[#8e8d8a] font-mono">lots</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-1.5 my-auto">
+                        <div class="widget-subcard px-2 py-1.5 flex items-center justify-between">
+                            <span class="text-[10px] text-white font-medium truncate" data-i18n="cat_cars">السيارات</span>
+                            <span class="dot-matrix text-[10px] text-[#8e8d8a]">01</span>
+                        </div>
+                        <div class="widget-subcard px-2 py-1.5 flex items-center justify-between">
+                            <span class="text-[10px] text-white font-medium truncate" data-i18n="cat_house">المنازل</span>
+                            <span class="dot-matrix text-[10px] text-[#8e8d8a]">02</span>
+                        </div>
+                        <div class="widget-subcard px-2 py-1.5 flex items-center justify-between">
+                            <span class="text-[10px] text-white font-medium truncate" data-i18n="cat_cooking">الطبخ</span>
+                            <span class="dot-matrix text-[10px] text-[#8e8d8a]">03</span>
+                        </div>
+                        <div class="widget-subcard px-2 py-1.5 flex items-center justify-between">
+                            <span class="text-[10px] text-white font-medium truncate" data-i18n="cat_gaming">الألعاب</span>
+                            <span class="dot-matrix text-[10px] text-[#8e8d8a]">04</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Card on Mobile / Right Column on Desktop: Player Identity & Room Launchpad -->
+            <div class="flex-1 md:col-span-5 glass-panel p-3.5 sm:p-5 flex flex-col justify-between min-h-0">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="block text-xs sm:text-sm font-medium text-white" data-i18n="yourNameLabel">اسم اللاعب والرمز</label>
+                            <span class="text-[9px] text-[#8e8d8a]">player profile</span>
+                        </div>
+                        <div class="metric-pill">
+                            <i class="fa-solid fa-user text-white text-[10px]"></i>
+                            <span class="text-[8px] text-[#8e8d8a] font-mono">ID</span>
+                        </div>
+                    </div>
+
+                    <input id="playerNameInput" type="text" maxlength="18" class="w-full px-3 py-2 rounded-xl bg-black/90 border border-white/10 focus:border-white/40 focus:outline-none text-white font-medium text-xs sm:text-sm" placeholder="أدخل اسمك...">
+
+                    <!-- Single-Row Scrollable or 6-Col Compact Avatar Picker -->
+                    <div id="avatarSelector" class="grid grid-cols-6 gap-1"></div>
+                </div>
+
+                <!-- Action Buttons Dock -->
+                <div class="space-y-1.5 pt-1">
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="window.app.createRoom()" class="py-2.5 px-3 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span data-i18n="createRoomShort">إنشاء غرفة</span>
+                        </button>
+                        <button onclick="window.app.quickSoloPlay()" class="py-2.5 px-3 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
+                            <i class="fa-solid fa-robot text-[11px]"></i>
+                            <span data-i18n="quickSoloShort">لعب سريع (AI)</span>
+                        </button>
+                    </div>
+
+                    <div class="flex gap-1.5 pt-0.5">
+                        <input id="joinCodeInput" type="text" maxlength="8" class="w-full px-3 py-2 rounded-full bg-black/90 border border-white/10 focus:border-white/40 focus:outline-none text-white dot-matrix text-sm uppercase text-center tracking-widest" placeholder="CODE">
+                        <button onclick="window.app.joinRoom()" class="px-5 py-2 rounded-full bg-black hover:bg-white/10 border border-white/15 text-white font-semibold text-xs whitespace-nowrap transition active:scale-95">
+                            <span data-i18n="joinRoomBtn">انضمام</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SCREEN 2: LOBBY & HOST SETTINGS (MOBILE-FIRST WITH SEGMENTED VIEW) ==================== -->
+        <section id="screenLobby" class="hidden h-full w-full flex flex-col gap-2 overflow-hidden">
+            
+            <!-- Mobile Segmented Switcher (Only on small screens so Settings & Players don't crowd each other) -->
+            <div class="grid grid-cols-2 gap-1.5 p-1 glass-panel shrink-0 lg:hidden">
+                <button id="lobbyTabSettingsBtn" onclick="window.app.switchLobbyMobileTab('settings')" class="py-1.5 rounded-2xl text-xs font-bold bg-white text-black transition">
+                    <i class="fa-solid fa-sliders me-1"></i><span data-i18n="roomSettingsTitle">إعدادات الغرفة</span>
+                </button>
+                <button id="lobbyTabPlayersBtn" onclick="window.app.switchLobbyMobileTab('players')" class="py-1.5 rounded-2xl text-xs font-medium text-[#8e8d8a] hover:text-white transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-users"></i>
+                    <span data-i18n="playersInRoomTitle">اللاعبون</span>
+                    <span id="mobileLobbyCountPill" class="px-1.5 py-0.2 rounded-full bg-white/15 text-white dot-matrix text-[10px]">1/6</span>
+                </button>
+            </div>
+
+            <!-- Main Lobby Content Area -->
+            <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-2.5 overflow-hidden">
+                
+                <!-- Panel A: Host Settings Bento Card -->
+                <div id="lobbySettingsPanel" class="lg:col-span-7 glass-panel p-3.5 sm:p-5 flex flex-col justify-between h-full min-h-0">
+                    <div class="flex items-center justify-between border-b border-white/10 pb-2 shrink-0">
+                        <div>
+                            <h3 class="text-sm sm:text-base font-medium text-white leading-none" data-i18n="roomSettingsTitle">إعدادات الغرفة</h3>
+                            <p class="text-[10px] text-[#8e8d8a] mt-0.5" data-i18n="roomSettingsSubtitle">يتحكم مضيف الغرفة في قوانين وميزانية المزاد</p>
+                        </div>
+                        <span id="hostBadgeIndicator" class="px-2.5 py-1 rounded-full bg-black border border-white/15 text-white text-[10px] font-medium">
+                            <i class="fa-solid fa-crown me-1"></i><span data-i18n="hostRoleBadge">أنت المضيف</span>
+                        </span>
+                    </div>
+
+                    <!-- 1. Game Category (2x2 Grid) -->
+                    <div class="my-auto">
+                        <label class="block text-[10px] text-[#8e8d8a] uppercase tracking-wider mb-1" data-i18n="selectCategoryLabel">1. اختر فئة المشروع:</label>
+                        <div id="categoryGrid" class="grid grid-cols-2 gap-1.5"></div>
+                    </div>
+
+                    <!-- 2. Starting Budget & 3. Number of Items (2 Side-by-Side Square Bento Widgets) -->
+                    <div class="grid grid-cols-2 gap-2 my-auto">
+                        <!-- Budget Widget -->
+                        <div class="widget-subcard p-2.5 flex flex-col justify-between space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-[11px] font-medium text-white" data-i18n="startingBudgetShort">2. الميزانية</label>
+                                <span class="text-[9px] text-[#8e8d8a] font-mono">USD</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1" id="budgetOptionsContainer">
+                                <button onclick="window.app.updateSetting('startingBudget', 5000)" data-budget="5000" class="budget-btn py-1 px-1 rounded-lg dot-matrix text-[11px] border transition">$5K</button>
+                                <button onclick="window.app.updateSetting('startingBudget', 10000)" data-budget="10000" class="budget-btn py-1 px-1 rounded-lg dot-matrix text-[11px] border transition">$10K</button>
+                                <button onclick="window.app.updateSetting('startingBudget', 25000)" data-budget="25000" class="budget-btn py-1 px-1 rounded-lg dot-matrix text-[11px] border transition">$25K</button>
+                                <button onclick="window.app.updateSetting('startingBudget', 50000)" data-budget="50000" class="budget-btn py-1 px-1 rounded-lg dot-matrix text-[11px] border transition">$50K</button>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <input id="customBudgetInput" type="number" min="1000" max="1000000" step="500" onchange="window.app.updateSetting('startingBudget', parseInt(this.value) || 10000)" class="w-full px-2 py-1 rounded-lg bg-black border border-white/15 text-white dot-matrix text-xs text-center">
+                            </div>
+                        </div>
+
+                        <!-- Item Count Widget -->
+                        <div class="widget-subcard p-2.5 flex flex-col justify-between space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-[11px] font-medium text-white" data-i18n="numItemsShort">3. عدد العناصر</label>
+                                <span class="text-[9px] text-[#8e8d8a] font-mono">LOTS</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1" id="itemCountContainer">
+                                <button onclick="window.app.updateSetting('itemCount', 4)" data-count="4" class="count-btn py-1 rounded-lg dot-matrix text-xs border transition">04</button>
+                                <button onclick="window.app.updateSetting('itemCount', 6)" data-count="6" class="count-btn py-1 rounded-lg dot-matrix text-xs border transition">06</button>
+                                <button onclick="window.app.updateSetting('itemCount', 8)" data-count="8" class="count-btn py-1 rounded-lg dot-matrix text-xs border transition">08</button>
+                                <button onclick="window.app.updateSetting('itemCount', 10)" data-count="10" class="count-btn py-1 rounded-lg dot-matrix text-xs border transition">10</button>
+                            </div>
+                            <div class="tick-ruler w-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- 4. AI Judge Toggle Strip -->
+                    <div class="widget-subcard p-2.5 flex items-center justify-between gap-2 shrink-0">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="metric-pill">
+                                <i class="fa-solid fa-wand-magic-sparkles text-white text-[9px]"></i>
+                                <span class="text-[8px] text-[#8e8d8a] font-mono">+2PT</span>
+                            </div>
+                            <div class="min-w-0">
+                                <h4 class="font-medium text-white text-xs truncate" data-i18n="aiJudgeTitle">تفعيل الحكم الذكي (AI Judge)</h4>
+                                <p class="text-[10px] text-[#8e8d8a] truncate" data-i18n="aiJudgeDesc">يمنح صوتاً بقيمة نقطتين لأفضل مشروع!</p>
+                            </div>
+                        </div>
+                        <button id="aiJudgeToggleBtn" onclick="window.app.toggleAiJudge()" class="w-11 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center bg-white shrink-0">
+                            <div id="aiJudgeKnob" class="w-5 h-5 rounded-full bg-black shadow-md transform transition-transform duration-200"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panel B: Connected Players List (Hidden on Mobile unless Players Tab is active) -->
+                <div id="lobbyPlayersPanel" class="hidden lg:flex lg:col-span-5 glass-panel p-3.5 sm:p-5 flex-col justify-between h-full min-h-0">
+                    <div class="flex flex-col flex-1 min-h-0 space-y-2">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-2 shrink-0">
+                            <div>
+                                <h3 class="text-sm sm:text-base font-medium text-white leading-none" data-i18n="playersInRoomTitle">اللاعبون في الغرفة</h3>
+                                <p class="text-[10px] text-[#8e8d8a] mt-0.5" data-i18n="playersInRoomSub">أضف بوتات ذكية أو شارك الكود</p>
+                            </div>
+                            <span id="playerCountBadge" class="dot-matrix text-lg text-white">1/6</span>
+                        </div>
+
+                        <!-- Add AI Bot Controls -->
+                        <div id="botControlsBar" class="flex gap-1.5 shrink-0">
+                            <button onclick="window.app.addBotPlayer()" class="flex-1 py-2 px-3 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white font-medium text-xs flex items-center justify-center gap-1.5 transition">
+                                <i class="fa-solid fa-robot"></i>
+                                <span data-i18n="addBotBtn">+ إضافة لاعب ذكي (Bot)</span>
+                            </button>
+                            <button onclick="window.app.removeBotPlayer()" class="py-2 px-3 rounded-full bg-black hover:bg-white/10 border border-white/10 text-[#8e8d8a] hover:text-white text-xs transition">
+                                <i class="fa-solid fa-user-minus"></i>
+                            </button>
+                        </div>
+
+                        <!-- Players Grid -->
+                        <div id="lobbyPlayersList" class="grid grid-cols-2 gap-1.5 flex-1 min-h-0 overflow-y-auto internal-scroll content-start"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Persistent Bottom Launch Bar (Always visible on mobile & desktop in Lobby) -->
+            <div class="glass-panel p-2.5 flex items-center justify-between gap-2 shrink-0">
+                <div class="flex items-center gap-1.5 lg:hidden">
+                    <button onclick="window.app.addBotPlayer()" class="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-white text-[11px] font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-robot"></i><span>+Bot</span>
+                    </button>
+                </div>
+                <button id="startMatchBtn" onclick="window.app.startAuctionPhase()" class="flex-1 py-2.5 px-5 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95">
+                    <i class="fa-solid fa-gavel"></i>
+                    <span data-i18n="startAuctionBtn">بدء المزاد الآن!</span>
+                </button>
+                <p id="waitingForHostMsg" class="hidden flex-1 text-center text-xs font-medium text-[#8e8d8a] animate-pulse" data-i18n="waitingForHostText">
+                    في انتظار مضيف الغرفة لبدء المزاد...
+                </p>
+            </div>
+        </section>
+
+        <!-- ==================== SCREEN 3: LIVE AUCTION ARENA (MOBILE-FIRST BENTO TELEMETRY) ==================== -->
+        <section id="screenAuction" class="hidden h-full w-full flex flex-col gap-2 overflow-hidden">
+            
+            <!-- Row 1: Two Square Bento Widgets Side-by-Side (Timer + My Budget - just like the photo!) -->
+            <div class="grid grid-cols-2 gap-2 shrink-0">
+                <!-- Left Square Widget: 5.0s Live Countdown -->
+                <div class="glass-panel p-3 sm:p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-xs sm:text-sm font-medium text-white leading-none" data-i18n="timerLabel">الوقت المتبقي</div>
+                            <span class="text-[9px] text-[#8e8d8a] font-mono">blitz timer</span>
+                        </div>
+                        <span class="dot-matrix text-xs text-[#8e8d8a]">
+                            <span id="currentItemNumber">1</span>/<span id="totalItemsNumber">6</span>
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between my-1">
+                        <div id="countdownNumber" class="dot-matrix text-3xl sm:text-4xl">5.0</div>
+                        <div class="metric-pill">
+                            <i class="fa-regular fa-clock text-white text-[10px]"></i>
+                            <span class="text-[8px] text-[#8e8d8a] font-mono">sec</span>
+                        </div>
+                    </div>
+                    <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div id="countdownBar" class="h-full bg-white transition-all duration-100" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- Right Square Widget: My Remaining Cash & Items Won -->
+                <div class="glass-panel p-3 sm:p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-xs sm:text-sm font-medium text-white leading-none" data-i18n="myRemainingBudgetShort">ميزانيتك</div>
+                            <span class="text-[9px] text-[#8e8d8a] font-mono" id="auctionCategoryTitle">السيارات</span>
+                        </div>
+                        <span id="auctionCategoryIcon" class="text-xs grayscale">🏎️</span>
+                    </div>
+                    <div class="flex items-center justify-between my-1">
+                        <div id="myRemainingBudget" class="dot-matrix text-2xl sm:text-4xl truncate">$10,000</div>
+                        <div class="metric-pill">
+                            <span id="myItemsWonCount" class="dot-matrix text-[11px] text-white">0</span>
+                            <span class="text-[7px] text-[#8e8d8a] font-mono">won</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                        <div id="auctionProgressBar" class="bg-white h-full transition-all duration-300" style="width: 20%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Main Auction Stage & Desktop Side Panel -->
+            <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-2 overflow-hidden">
+                
+                <!-- Center Wide Bento Widget: Current Item + Highest Bid + Action Buttons -->
+                <div class="lg:col-span-7 glass-panel p-3.5 sm:p-5 relative overflow-hidden flex flex-col justify-between h-full min-h-0">
+                    <!-- Sold / Awarded Overlay Banner -->
+                    <div id="itemResultOverlay" class="hidden absolute inset-0 z-30 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-5 text-center">
+                        <div class="w-12 h-12 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xl mb-2 gavel-anim">
+                            🔨
+                        </div>
+                        <h3 id="overlayResultTitle" class="dot-matrix text-2xl sm:text-3xl text-white mb-1">تم البيع!</h3>
+                        <p id="overlayResultSubtitle" class="text-xs sm:text-sm text-[#8e8d8a] font-medium"></p>
+                    </div>
+
+                    <!-- Item Header & Current Bid Dot-Matrix (Like "Heart Rate 61" card) -->
+                    <div class="flex items-start justify-between gap-2 shrink-0">
+                        <div class="min-w-0">
+                            <span id="itemRarityBadge" class="text-[10px] text-[#8e8d8a] block">قطعة نادرة</span>
+                            <h2 id="itemTitle" class="text-base sm:text-xl font-bold text-white truncate">محرك تيربو مزدوج V8</h2>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <div class="text-end">
+                                <div class="text-[9px] text-[#8e8d8a]" data-i18n="currentBidLabel">أعلى مزايدة</div>
+                                <div id="itemCurrentBid" class="dot-matrix text-2xl sm:text-4xl text-white">$1,000</div>
+                            </div>
+                            <div class="metric-pill">
+                                <i class="fa-solid fa-arrow-trend-up text-white text-[10px]"></i>
+                                <span class="text-[8px] text-[#8e8d8a] font-mono">bid</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compact Item Showcase Box -->
+                    <div class="grid grid-cols-12 gap-2.5 items-center widget-subcard p-2.5 sm:p-3.5 my-auto">
+                        <div class="col-span-4 flex items-center justify-center">
+                            <div id="itemSvgContainer" class="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl bg-black border border-white/10 flex items-center justify-center p-2 [&>svg]:w-full [&>svg]:h-full"></div>
+                        </div>
+                        <div class="col-span-8 space-y-1.5 text-start min-w-0">
+                            <p id="itemDesc" class="text-[11px] sm:text-xs text-[#8e8d8a] leading-snug line-clamp-2"></p>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <div class="bg-black/80 px-2.5 py-1.5 rounded-xl border border-white/5">
+                                    <div class="text-[9px] text-[#8e8d8a]" data-i18n="startingPriceLabel">سعر البداية</div>
+                                    <div id="itemStartPrice" class="dot-matrix text-xs sm:text-sm text-white">$1,000</div>
+                                </div>
+                                <div class="bg-black/80 px-2.5 py-1.5 rounded-xl border border-white/5">
+                                    <div class="text-[9px] text-[#8e8d8a]" data-i18n="highestBidderLabel">المزايد الأعلى</div>
+                                    <div id="highestBidderDisplay" class="text-[11px] font-medium text-white truncate">---</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Horizontal Live Bidders Ticker (Visible on Mobile right inside the main card!) -->
+                    <div class="lg:hidden shrink-0">
+                        <div id="mobileBiddersStrip" class="flex items-center gap-1.5 overflow-x-auto internal-scroll pb-0.5"></div>
+                    </div>
+
+                    <!-- Thumb-Zone Action Buttons: "شراء" (Buy / Bid) & "ما أريد" (Pass) -->
+                    <div class="grid grid-cols-12 gap-2 shrink-0 pt-0.5">
+                        <button id="btnPlaceBid" onclick="window.app.placeBid()" class="col-span-8 py-3 px-4 rounded-full bg-white hover:bg-neutral-200 disabled:opacity-30 disabled:pointer-events-none text-black font-bold text-xs sm:text-sm flex items-center justify-between transition active:scale-95">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                                <span data-i18n="buyActionBtn">شراء</span>
+                            </span>
+                            <span id="nextBidAmountTag" class="px-2.5 py-0.5 rounded-full bg-black text-white dot-matrix text-xs sm:text-sm">$1,200</span>
+                        </button>
+
+                        <button id="btnPassItem" onclick="window.app.passCurrentItem()" class="col-span-4 py-3 px-3 rounded-full bg-black hover:bg-white/10 border border-white/15 disabled:opacity-30 disabled:pointer-events-none text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-1 transition active:scale-95">
+                            <i class="fa-solid fa-xmark text-[#8e8d8a]"></i>
+                            <span data-i18n="passActionBtn">ما أريد</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column (Desktop Only - Since Mobile has the compact horizontal strip above) -->
+                <div class="hidden lg:grid lg:col-span-5 grid-rows-2 gap-2.5 h-full min-h-0">
+                    <div class="glass-panel p-3.5 flex flex-col min-h-0">
+                        <div class="flex items-center justify-between mb-2 shrink-0">
+                            <h3 class="text-xs font-medium text-white" data-i18n="biddersStatusTitle">حالة المتنافسين</h3>
+                            <span class="text-[9px] text-[#8e8d8a] font-mono">LIVE</span>
+                        </div>
+                        <div id="liveBiddersList" class="grid grid-cols-2 gap-1.5 flex-1 min-h-0 overflow-y-auto internal-scroll content-start"></div>
+                    </div>
+
+                    <div class="glass-panel p-3.5 flex flex-col min-h-0">
+                        <div class="flex items-center justify-between mb-2 shrink-0">
+                            <h3 class="text-xs font-medium text-white" data-i18n="myCollectionTitle">مجموعتك الحالية</h3>
+                            <span class="text-[9px] text-[#8e8d8a] font-mono">INVENTORY</span>
+                        </div>
+                        <div id="myInventoryGrid" class="grid grid-cols-4 gap-1.5 flex-1 min-h-0 overflow-y-auto internal-scroll content-start"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SCREEN 4: VOTING & AI EVALUATION ==================== -->
+        <section id="screenVoting" class="hidden h-full w-full flex flex-col gap-2.5 overflow-hidden">
+            <div class="glass-panel px-5 py-3 flex items-center justify-between gap-4 shrink-0">
+                <div>
+                    <div class="text-[10px] text-[#8e8d8a] uppercase tracking-wider" data-i18n="votingPhaseBadge">مرحلة التقييم والتصويت النهائي</div>
+                    <h2 class="text-base sm:text-xl font-medium text-white" data-i18n="votingHeadline">صوّت لأفضل مشروع متكامل!</h2>
+                    <p class="text-[11px] text-[#8e8d8a] hidden sm:block" data-i18n="votingRulesSub">
+                        استعرض مجموعات جميع اللاعبين. كل صوت من لاعب يمنح نقطة واحدة (1)، وصوت الحكم الذكي يمنح نقطتين (2)!
+                    </p>
+                </div>
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <span class="dot-matrix text-3xl">+1</span>
+                    <div class="metric-pill !py-1 !px-2.5">
+                        <i class="fa-solid fa-check text-white text-xs"></i>
+                        <span class="text-[8px] text-[#8e8d8a] font-mono">vote</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player Builds Showcase Grid (Fits in remaining viewport height) -->
+            <div id="votingBuildsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 flex-1 min-h-0 overflow-y-auto internal-scroll"></div>
+        </section>
+
+        <!-- ==================== SCREEN 5: FINAL RESULTS & PODIUM ==================== -->
+        <section id="screenResults" class="hidden h-full w-full flex flex-col gap-2.5 overflow-hidden">
+            <!-- Top Row: Winner Celebration & AI Judge Verdict side-by-side -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 shrink-0">
+                <div class="lg:col-span-5 glass-panel p-4 flex flex-col justify-center">
+                    <div class="text-[10px] text-[#8e8d8a] uppercase tracking-widest">FINAL TELEMETRY</div>
+                    <h2 class="text-lg sm:text-xl font-medium text-white mt-0.5" data-i18n="resultsHeadline">النتائج النهائية للمزاد</h2>
+                    <p id="winnerAnnouncementText" class="text-xs sm:text-sm font-medium text-white mt-1"></p>
+                </div>
+
+                <!-- AI Judge Official Verdict Card (Shown if AI Judge Enabled) -->
+                <div id="aiVerdictCard" class="hidden lg:col-span-7 glass-panel p-4 flex flex-col justify-between">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <div class="metric-pill !py-1 !px-2">
+                                <i class="fa-solid fa-wand-magic-sparkles text-white text-[10px]"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-white text-xs sm:text-sm leading-none" data-i18n="aiJudgeVerdictTitle">قرار الحكم الذكي (AI Judge)</h4>
+                                <span class="text-[10px] text-[#8e8d8a]" data-i18n="aiAwardedPointsSub">منح صوته الذهبي (+2 نقطة) إلى:</span>
+                            </div>
+                        </div>
+                        <span id="aiChosenWinnerBadge" class="px-3 py-0.5 rounded-full bg-white text-black font-bold text-[11px]"></span>
+                    </div>
+                    <p id="aiReasoningParagraph" class="text-[11px] sm:text-xs text-[#8e8d8a] leading-relaxed mt-2 line-clamp-2"></p>
+                </div>
+            </div>
+
+            <!-- Final Leaderboard Cards (Fills middle area cleanly) -->
+            <div id="finalStandingsList" class="grid grid-cols-1 md:grid-cols-2 gap-2.5 flex-1 min-h-0 overflow-y-auto internal-scroll content-start"></div>
+
+            <!-- Play Again / Return to Lobby Footer Bar -->
+            <div class="flex items-center justify-center gap-3 shrink-0 pt-1">
+                <button id="playAgainHostBtn" onclick="window.app.returnToLobby()" class="px-6 py-2.5 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs sm:text-sm flex items-center gap-2 transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span data-i18n="playAgainBtn">جولة جديدة في نفس الغرفة</span>
+                </button>
+                <button onclick="window.app.confirmLeaveRoom()" class="px-5 py-2.5 rounded-full bg-black/80 hover:bg-black text-white font-medium text-xs sm:text-sm border border-white/15 transition">
+                    <span data-i18n="exitToHomeBtn">العودة للرئيسية</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODAL: HOW TO PLAY ==================== -->
+    <div id="rulesModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel max-w-xl w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="text-lg font-medium text-white flex items-center gap-2">
+                    <i class="fa-regular fa-circle-question text-[#8e8d8a]"></i>
+                    <span data-i18n="howToPlayTitle">كيف تلعب زايد؟</span>
+                </h3>
+                <button onclick="window.app.closeRulesModal()" class="text-[#8e8d8a] hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-2.5 text-xs sm:text-sm text-[#8e8d8a] leading-relaxed">
+                <div class="p-3.5 widget-subcard">
+                    <strong class="text-white block mb-1" data-i18n="rule1Title">1. إعداد الغرفة والميزانية:</strong>
+                    <span data-i18n="rule1Desc">يحدد المضيف الميزانية المتساوية للجميع، عدد العناصر، وفئة المشروع (سيارات، منازل، طبخ، أو غرفة ألعاب).</span>
+                </div>
+                <div class="p-3.5 widget-subcard">
+                    <strong class="text-white block mb-1" data-i18n="rule2Title">2. المزاد السريع (5 ثوانٍ):</strong>
+                    <span data-i18n="rule2Desc">يظهر كل عنصر مع عداد 5 ثوانٍ. اضغط "شراء" لرفع المزايدة وإعادة العداد إلى 5 ثوانٍ، أو اضغط "ما أريد" للانسحاب من العنصر الحالي وتوفير أموالك.</span>
+                </div>
+                <div class="p-3.5 widget-subcard">
+                    <strong class="text-white block mb-1" data-i18n="rule3Title">3. التصويت والحكم الذكي:</strong>
+                    <span data-i18n="rule3Desc">بعد انتهاء المزاد، يصوت كل لاعب لمشروع لاعب آخر (+1 نقطة). وإذا كان الحكم الذكي مفعلاً، يقيم المشاريع ويمنح (+2 نقطة) لأفضل مشروع!</span>
+                </div>
+            </div>
+            <button onclick="window.app.closeRulesModal()" class="w-full py-3 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-sm transition" data-i18n="gotItBtn">
+                فهمت، لنبدأ!
+            </button>
+        </div>
+    </div>
+
+    <!-- Application & Firebase Multiplayer Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ============================================================================
+        // 1. LOCALIZATION DICTIONARY (ARABIC DEFAULT + ENGLISH)
+        // ============================================================================
+        const I18N = {
+            ar: {
+                appTitle: "زايد",
+                appSubtitle: "لعبة المزادات والتقييم",
+                roomCodeLabel: "كود:",
+                howToPlayBtn: "طريقة اللعب",
+                heroBadge: "مزادات سريعة • ذكاء اصطناعي • تحدي الأصدقاء",
+                heroHeadline: "زايد بذكاء، اصنع مجموعتك، واكسب تصويت الجميع!",
+                heroDescription: "4 فئات للمزاد • ميزانية متساوية • تقييم الذكاء الاصطناعي",
+                cat_cars: "تعديل السيارات",
+                cat_house: "بناء المنازل",
+                cat_cooking: "الطبخ الفاخر",
+                cat_gaming: "غرفة الألعاب",
+                cat_cars_desc: "زايد على المحركات والتيربو لبناء سيارة الأحلام.",
+                cat_house_desc: "زايد على التصاميم والأثاث لبناء منزل متكامل.",
+                cat_cooking_desc: "زايد على المكونات النادرة لتحضير وليمة فاخرة.",
+                cat_gaming_desc: "زايد على البطاقات والشاشات لبناء سيت أب أسطوري.",
+                yourNameLabel: "اسم اللاعب والرمز",
+                chooseAvatarLabel: "اختر صورتك الرمزية",
+                createRoomBtn: "إنشاء غرفة جديدة (مضيف)",
+                createRoomShort: "إنشاء غرفة",
+                orJoinText: "أو انضم لغرفة",
+                joinRoomBtn: "انضمام",
+                quickSoloBtn: "تجربة سريعة مع بوتات ذكية",
+                quickSoloShort: "لعب سريع (AI)",
+                roomSettingsTitle: "إعدادات الغرفة",
+                roomSettingsSubtitle: "يتحكم مضيف الغرفة في قوانين وميزانية المزاد",
+                hostRoleBadge: "أنت المضيف",
+                guestRoleBadge: "لاعب ضيف",
+                selectCategoryLabel: "1. اختر فئة المشروع:",
+                startingBudgetLabel: "2. الميزانية الابتدائية:",
+                startingBudgetShort: "2. الميزانية",
+                customBudgetText: "مخصص:",
+                numItemsLabel: "3. عدد العناصر:",
+                numItemsShort: "3. العناصر",
+                numItemsHint: "يتم تسعير كل عنصر تلقائياً بشكل متناسب مع الميزانية.",
+                aiJudgeTitle: "تفعيل الحكم الذكي (AI Judge)",
+                aiJudgeShort: "الحكم الذكي",
+                twoPointsBadge: "+2 نقطة",
+                aiJudgeDesc: "يمنح صوتاً بقيمة نقطتين لأفضل مشروع!",
+                playersInRoomTitle: "اللاعبون",
+                playersInRoomSub: "أضف بوتات ذكية أو شارك الكود",
+                addBotBtn: "+ إضافة لاعب ذكي (Bot)",
+                startAuctionBtn: "بدء المزاد الآن!",
+                waitingForHostText: "في انتظار مضيف الغرفة لبدء المزاد...",
+                currentThemeLabel: "فئة المشروع",
+                itemProgressLabel: "العنصر الحالي",
+                myRemainingBudgetLabel: "ميزانيتك المتبقية",
+                myRemainingBudgetShort: "ميزانيتك",
+                myItemsWonLabel: "عناصرك",
+                timerLabel: "الوقت المتبقي",
+                startingPriceLabel: "سعر البداية",
+                currentBidLabel: "أعلى مزايدة",
+                highestBidderLabel: "المزايد الأعلى",
+                noBidsYet: "بانتظار أول مزايدة",
+                buyActionBtn: "شراء",
+                passActionBtn: "ما أريد",
+                biddersStatusTitle: "حالة المتنافسين",
+                myCollectionTitle: "مجموعتك الحالية",
+                emptyCollectionMsg: "لم تفز بأي عنصر حتى الآن",
+                votingPhaseBadge: "مرحلة التقييم والتصويت النهائي",
+                votingHeadline: "صوّت لأفضل مشروع متكامل!",
+                votingRulesSub: "كل صوت من لاعب يمنح نقطة (1)، وصوت الحكم الذكي يمنح نقطتين (2)!",
+                voteForBuildBtn: "تصويت لهذا المشروع (+1)",
+                votedBtnText: "تم التصويت ✓",
+                cannotVoteSelf: "مجموعتك الخاصة",
+                resultsHeadline: "النتائج النهائية للمزاد",
+                aiJudgeVerdictTitle: "قرار الحكم الذكي (AI Judge)",
+                aiAwardedPointsSub: "منح صوته الذهبي (+2 نقطة) إلى:",
+                playAgainBtn: "جولة جديدة",
+                exitToHomeBtn: "الرئيسية",
+                howToPlayTitle: "كيف تلعب زايد؟",
+                rule1Title: "1. إعداد الغرفة والميزانية:",
+                rule1Desc: "يحدد المضيف الميزانية المتساوية للجميع، عدد العناصر، وفئة المشروع (سيارات، منازل، طبخ، أو غرفة ألعاب).",
+                rule2Title: "2. المزاد السريع (5 ثوانٍ):",
+                rule2Desc: "يظهر كل عنصر مع عداد 5 ثوانٍ. اضغط 'شراء' لرفع المزايدة وإعادة العداد إلى 5 ثوانٍ، أو اضغط 'ما أريد' للانسحاب من العنصر الحالي وتوفير أموالك.",
+                rule3Title: "3. التصويت والحكم الذكي:",
+                rule3Desc: "بعد انتهاء المزاد، يصوت كل لاعب لمشروع لاعب آخر (+1 نقطة). وإذا كان الحكم الذكي مفعلاً، يقيم المشاريع ويمنح (+2 نقطة) لأفضل مشروع!",
+                gotItBtn: "فهمت، لنبدأ!",
+                statusActive: "ينافس",
+                statusPassed: "انسحب",
+                statusLeading: "الأعلى 🔥",
+                soldTitle: "تم البيع! 🔨",
+                unsoldTitle: "لم يشترِ أحد!",
+                wonByText: "فاز بها",
+                forAmountText: "مقابل",
+                noOneBidText: "مرّ الوقت أو انسحب الجميع دون مزايدة",
+                toastCodeCopied: "تم نسخ كود الغرفة!",
+                toastNeedMinPlayers: "تحتاج إلى لاعبين على الأقل (أو أضف بوت) لبدء اللعبة!",
+                toastInsufficientFunds: "ميزانيتك لا تكفي لهذه المزايدة!",
+                toastAlreadyHighest: "أنت بالفعل صاحب أعلى مزايدة!",
+                toastPassedItem: "لقد انسحبت من المزايدة على هذا العنصر",
+                pointsUnit: "نقاط",
+                playerVotesLabel: "أصوات:",
+                aiBonusLabel: "AI:",
+                budgetLeftLabel: "المتبقي:",
+                itemsAcquiredLabel: "العناصر:",
+                tier_common: "قطعة أساسية",
+                tier_rare: "قطعة مميزة ⭐",
+                tier_epic: "قطعة نادرة 🔥",
+                tier_legendary: "قطعة أسطورية 👑"
+            },
+            en: {
+                appTitle: "Zayed",
+                appSubtitle: "Multiplayer Auction App",
+                roomCodeLabel: "Code:",
+                howToPlayBtn: "Rules",
+                heroBadge: "5s Blitz Auctions • AI Judge • Multiplayer",
+                heroHeadline: "Bid Smart, Build Your Collection & Win!",
+                heroDescription: "4 Project Themes • Equal Budget • AI Judge Rating",
+                cat_cars: "Cars Mod",
+                cat_house: "House Build",
+                cat_cooking: "Cooking",
+                cat_gaming: "Gaming Setup",
+                cat_cars_desc: "Bid on engines, turbos, and aero kits.",
+                cat_house_desc: "Bid on architecture, pools, and luxury furniture.",
+                cat_cooking_desc: "Bid on Wagyu, truffles, and chef tools.",
+                cat_gaming_desc: "Bid on GPUs, OLED monitors, and RGB gear.",
+                yourNameLabel: "Player Profile",
+                chooseAvatarLabel: "Choose Your Avatar",
+                createRoomBtn: "Create New Room (Host)",
+                createRoomShort: "Create Room",
+                orJoinText: "OR JOIN ROOM",
+                joinRoomBtn: "Join",
+                quickSoloBtn: "Quick Play with AI Bots",
+                quickSoloShort: "Solo Play (AI)",
+                roomSettingsTitle: "Settings",
+                roomSettingsSubtitle: "Host configures auction budget & rules",
+                hostRoleBadge: "Host",
+                guestRoleBadge: "Guest",
+                selectCategoryLabel: "1. Project Theme:",
+                startingBudgetLabel: "2. Starting Budget:",
+                startingBudgetShort: "2. Budget",
+                customBudgetText: "Custom:",
+                numItemsLabel: "3. Auction Lots:",
+                numItemsShort: "3. Lots",
+                numItemsHint: "Item prices scale automatically with budget.",
+                aiJudgeTitle: "Enable AI Judge",
+                aiJudgeShort: "AI Judge",
+                twoPointsBadge: "+2 PTS",
+                aiJudgeDesc: "AI evaluates builds & awards a +2 pt bonus!",
+                playersInRoomTitle: "Players",
+                playersInRoomSub: "Share code or add smart AI bots",
+                addBotBtn: "+ Add AI Bot Player",
+                startAuctionBtn: "Start Auction Now!",
+                waitingForHostText: "Waiting for Host to start...",
+                currentThemeLabel: "Theme",
+                itemProgressLabel: "Current Lot",
+                myRemainingBudgetLabel: "Your Budget",
+                myRemainingBudgetShort: "Your Cash",
+                myItemsWonLabel: "Won",
+                timerLabel: "Time Left",
+                startingPriceLabel: "Start Price",
+                currentBidLabel: "Highest Bid",
+                highestBidderLabel: "Leader",
+                noBidsYet: "Waiting for opener",
+                buyActionBtn: "Bid",
+                passActionBtn: "Pass",
+                biddersStatusTitle: "Live Bidders",
+                myCollectionTitle: "Your Build",
+                emptyCollectionMsg: "No items won yet",
+                votingPhaseBadge: "Final Rating & Voting",
+                votingHeadline: "Vote for the Best Build!",
+                votingRulesSub: "Player vote = 1 PT (no self-vote). AI Judge = 2 PTS!",
+                voteForBuildBtn: "Vote (+1 PT)",
+                votedBtnText: "Voted ✓",
+                cannotVoteSelf: "Your Build",
+                resultsHeadline: "Final Match Standings",
+                aiJudgeVerdictTitle: "AI Judge Verdict",
+                aiAwardedPointsSub: "Awarded Golden Vote (+2 PTS) to:",
+                playAgainBtn: "Play Again",
+                exitToHomeBtn: "Home",
+                howToPlayTitle: "How to Play Zayed",
+                rule1Title: "1. Room Setup & Equal Budget:",
+                rule1Desc: "The host selects the equal starting cash, number of items, and category (Cars, House, Cooking, or Gaming Room).",
+                rule2Title: "2. 5-Second Blitz Auctions:",
+                rule2Desc: "Each item starts with a 5-second timer. Click 'Buy / Bid' to raise the price and reset the timer to 5s, or click 'Pass' to drop out of the current item.",
+                rule3Title: "3. Voting & AI Judge:",
+                rule3Desc: "After all items are auctioned, players vote for their favorite rival build (+1 pt). If enabled, the AI Judge evaluates all builds and awards +2 pts!",
+                gotItBtn: "Got It, Let's Play!",
+                statusActive: "Active",
+                statusPassed: "Passed",
+                statusLeading: "Lead 🔥",
+                soldTitle: "SOLD! 🔨",
+                unsoldTitle: "UNSOLD!",
+                wonByText: "Won by",
+                forAmountText: "for",
+                noOneBidText: "Timer expired or everyone passed with no bids",
+                toastCodeCopied: "Room code copied to clipboard!",
+                toastNeedMinPlayers: "Need at least 2 players (or add a Bot) to start!",
+                toastInsufficientFunds: "Insufficient budget for this bid!",
+                toastAlreadyHighest: "You are already the highest bidder!",
+                toastPassedItem: "You passed on bidding for this item",
+                pointsUnit: "PTS",
+                playerVotesLabel: "Votes:",
+                aiBonusLabel: "AI:",
+                budgetLeftLabel: "Left:",
+                itemsAcquiredLabel: "Won:",
+                tier_common: "Core Part",
+                tier_rare: "Rare ⭐",
+                tier_epic: "Epic 🔥",
+                tier_legendary: "Legendary 👑"
+            }
+        };
+
+        // ============================================================================
+        // 2. THEMED ITEM CATALOG (4 CATEGORIES x 10 ITEMS WITH CUSTOM SVG ART)
+        // ============================================================================
+        // baseRatio represents the starting price proportion relative to the average per-item budget
+        const ITEM_CATALOG = {
+            cars: [
+                {
+                    id: "car_v8_turbo",
+                    tier: "legendary",
+                    baseRatio: 0.22,
+                    ar: { name: "محرك V8 تيربو مزدوج", desc: "قلب نابض بقوة 850 حصان يمنح سيارتك تسارعاً خارقاً على الحلبة." },
+                    en: { name: "Twin-Turbo V8 Engine", desc: "850HP powerhouse block that gives your project car blistering acceleration." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="25" y="35" width="70" height="55" rx="10" fill="#f59e0b" stroke="#fef3c7" stroke-width="3"/><circle cx="42" cy="30" r="14" fill="#38bdf8" stroke="#fff" stroke-width="3"/><circle cx="78" cy="30" r="14" fill="#38bdf8" stroke="#fff" stroke-width="3"/><path d="M35 60 H85 M35 72 H85" stroke="#0f172a" stroke-width="5" stroke-linecap="round"/><circle cx="60" cy="65" r="10" fill="#ef4444"/></svg>`
+                },
+                {
+                    id: "car_carbon_aero",
+                    tier: "epic",
+                    baseRatio: 0.16,
+                    ar: { name: "هيكل كاربون فايبر كامل", desc: "طقم هوائي عريض يخفف الوزن ويزيد الثبات في المنعطفات السريعة." },
+                    en: { name: "Full Carbon Widebody Kit", desc: "Ultra-lightweight aerodynamic body panels and rear diffuser." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><path d="M15 75 L32 45 H88 L105 75 Z" fill="#6366f1" stroke="#e0e7ff" stroke-width="3"/><rect x="10" y="70" width="100" height="14" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><circle cx="33" cy="82" r="12" fill="#0f172a" stroke="#f59e0b" stroke-width="4"/><circle cx="87" cy="82" r="12" fill="#0f172a" stroke="#f59e0b" stroke-width="4"/></svg>`
+                },
+                {
+                    id: "car_titanium_exhaust",
+                    tier: "rare",
+                    baseRatio: 0.13,
+                    ar: { name: "عادم تيتانيوم رياضي", desc: "صوت هدير طربي مع تقليل ضغط العادم وزيادة الأحصنة." },
+                    en: { name: "Titanium Quad Exhaust", desc: "Aggressive racing roar with flame-spitting anodized tips." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="20" y="45" width="55" height="30" rx="8" fill="#64748b" stroke="#e2e8f0" stroke-width="3"/><circle cx="90" cy="52" r="10" fill="#0ea5e9" stroke="#f8fafc" stroke-width="3"/><circle cx="90" cy="68" r="10" fill="#0ea5e9" stroke="#f8fafc" stroke-width="3"/><path d="M100 50 L115 44 M100 68 L115 74" stroke="#f97316" stroke-width="4" stroke-linecap="round"/></svg>`
+                },
+                {
+                    id: "car_ceramic_brakes",
+                    tier: "rare",
+                    baseRatio: 0.14,
+                    ar: { name: "مكابح سيراميك كربونية", desc: "قوة كبح فورية تتحمل أعلى درجات الحرارة في السباقات." },
+                    en: { name: "Carbon-Ceramic Brake Kit", desc: "6-piston gold calipers with slotted high-heat ceramic rotors." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><circle cx="60" cy="60" r="42" fill="#334155" stroke="#94a3b8" stroke-width="6"/><circle cx="60" cy="60" r="22" fill="#0f172a" stroke="#f59e0b" stroke-width="4"/><path d="M60 18 A42 42 0 0 1 102 60" stroke="#ef4444" stroke-width="14" fill="none" stroke-linecap="round"/></svg>`
+                },
+                {
+                    id: "car_forged_wheels",
+                    tier: "rare",
+                    baseRatio: 0.12,
+                    ar: { name: "جنوط رياضية مطروقة + إطارات سليك", desc: "ثبات استثنائي على الأسفلت ومظهر هجومي خاطف للأنظار." },
+                    en: { name: "Forged Magnesium Rims & Slicks", desc: "Track-ready grip and ultra-low unsprung rotational mass." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><circle cx="60" cy="60" r="45" fill="#0f172a" stroke="#475569" stroke-width="8"/><circle cx="60" cy="60" r="30" fill="none" stroke="#fbbf24" stroke-width="5"/><path d="M60 30 V90 M30 60 H90 M39 39 L81 81 M81 39 L39 81" stroke="#fbbf24" stroke-width="4"/></svg>`
+                },
+                {
+                    id: "car_ecu_tune",
+                    tier: "common",
+                    baseRatio: 0.10,
+                    ar: { name: "برمجة كمبيوتر Stage 3", desc: "ضبط احترافي لخرائط الوقود والتيربو لاستخراج أقصى عزم." },
+                    en: { name: "Stage 3 ECU & Telemetry Tune", desc: "Custom fuel mapping, launch control, and boost controller." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="25" y="25" width="70" height="70" rx="12" fill="#0f172a" stroke="#10b981" stroke-width="4"/><path d="M38 72 L52 48 L66 64 L82 40" fill="none" stroke="#34d399" stroke-width="5" stroke-linecap="round"/></svg>`
+                },
+                {
+                    id: "car_coilovers",
+                    tier: "common",
+                    baseRatio: 0.11,
+                    ar: { name: "نظام تعليق هوائي ذكي", desc: "تحكم إلكتروني بارتفاع السيارة وقساوة المساعدات." },
+                    en: { name: "Active Track Coilover Suspension", desc: "Electronically adjustable ride height and cornering stiffness." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="52" y="15" width="16" height="90" rx="6" fill="#94a3b8"/><path d="M40 35 L80 45 L40 55 L80 65 L40 75 L80 85" fill="none" stroke="#f43f5e" stroke-width="7" stroke-linecap="round"/></svg>`
+                },
+                {
+                    id: "car_nitrous",
+                    tier: "epic",
+                    baseRatio: 0.15,
+                    ar: { name: "منظومة غاز النيتروس NOS", desc: "دفعة فورية من القوة الحصانية في اللحظات الحاسمة." },
+                    en: { name: "Dual-Bottle Nitrous Oxide System", desc: "Instant 200HP shot at the press of a steering wheel button." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="32" y="30" width="24" height="68" rx="10" fill="#2563eb" stroke="#93c5fd" stroke-width="3"/><rect x="64" y="30" width="24" height="68" rx="10" fill="#2563eb" stroke="#93c5fd" stroke-width="3"/><circle cx="44" cy="24" r="6" fill="#f59e0b"/><circle cx="76" cy="24" r="6" fill="#f59e0b"/></svg>`
+                },
+                {
+                    id: "car_racing_seats",
+                    tier: "common",
+                    baseRatio: 0.09,
+                    ar: { name: "مقاعد سباق كاربون ومقود ألكانتارا", desc: "مقصورة قيادة احترافية بشاشة رقمية متطورة." },
+                    en: { name: "Carbon Bucket Seats & Alcantara Wheel", desc: "FIA-grade cockpit ergonomics with shift-light display." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><path d="M42 20 H78 L85 75 L95 95 H25 L35 75 Z" fill="#dc2626" stroke="#fecaca" stroke-width="3"/></svg>`
+                },
+                {
+                    id: "car_chameleon_paint",
+                    tier: "rare",
+                    baseRatio: 0.12,
+                    ar: { name: "طلاء حرباء متغير اللون + حماية PPF", desc: "لمسة جمالية فاخرة تتغير ألوانها مع انعكاس الضوء." },
+                    en: { name: "Midnight Chameleon Wrap & Ceramic Coat", desc: "Show-stopping color-shift finish with mirror gloss." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ec4899"/><stop offset="50%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs><circle cx="60" cy="60" r="42" fill="url(#g1)" stroke="#fff" stroke-width="3"/></svg>`
+                }
+            ],
+            house: [
+                {
+                    id: "house_infinity_pool",
+                    tier: "legendary",
+                    baseRatio: 0.22,
+                    ar: { name: "مسبح إنفينيتي بإطلالة بانورامية", desc: "مسبح فاخر مع إضاءة ليلية وشلال مائي يرفع فخامة المنزل." },
+                    en: { name: "Heated Infinity Pool & Cabana", desc: "Resort-style glass-edge pool with sunken firepit lounge." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="15" y="45" width="90" height="50" rx="12" fill="#0284c7" stroke="#bae6fd" stroke-width="4"/><path d="M25 65 Q45 55 60 65 T95 65" fill="none" stroke="#e0f2fe" stroke-width="4"/><circle cx="88" cy="28" r="12" fill="#fbbf24"/></svg>`
+                },
+                {
+                    id: "house_smart_glass",
+                    tier: "epic",
+                    baseRatio: 0.17,
+                    ar: { name: "واجهات زجاجية ذكية وأسقف مرتفعة", desc: "تصميم معماري حديث يسمح بدخول الضوء الطبيعي بذكاء." },
+                    en: { name: "Double-Height Smart Glass Facade", desc: "Electrochromic privacy glass walls with modern steel beams." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><polygon points="60,15 105,50 95,100 25,100 15,50" fill="#38bdf8" fill-opacity="0.35" stroke="#e0f2fe" stroke-width="4"/><line x1="60" y1="15" x2="60" y2="100" stroke="#f8fafc" stroke-width="3"/></svg>`
+                },
+                {
+                    id: "house_italian_kitchen",
+                    tier: "epic",
+                    baseRatio: 0.16,
+                    ar: { name: "مطبخ رخام إيطالي بأجهزة ذكية", desc: "جزيرة مطبخ من رخام كالاكاتا مع أفران وثلاجات مخفية." },
+                    en: { name: "Italian Marble Chef's Kitchen", desc: "Waterfall Calacatta island with built-in smart appliances." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="18" y="55" width="84" height="40" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="3"/><rect x="28" y="25" width="64" height="22" rx="4" fill="#334155"/><line x1="25" y1="70" x2="95" y2="70" stroke="#cbd5e1" stroke-width="4"/></svg>`
+                },
+                {
+                    id: "house_home_theater",
+                    tier: "rare",
+                    baseRatio: 0.14,
+                    ar: { name: "قاعة سينما منزلية Dolby Atmos", desc: "شاشة عملاقة 150 بوصة مع مقاعد جلدية وعزل صوتي كامل." },
+                    en: { name: "Private IMAX Home Cinema", desc: "Acoustic star-ceiling theater with motorized leather recliners." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="18" y="25" width="84" height="48" rx="6" fill="#a855f7" stroke="#f3e8ff" stroke-width="4"/><rect x="28" y="84" width="26" height="16" rx="5" fill="#dc2626"/><rect x="66" y="84" width="26" height="16" rx="5" fill="#dc2626"/></svg>`
+                },
+                {
+                    id: "house_zen_garden",
+                    tier: "rare",
+                    baseRatio: 0.12,
+                    ar: { name: "حديقة خارجية وجلسة شواء متكاملة", desc: "أشجار طبيعية وممرات حجرية مضاءة تمنح المنزل روحاً هادئة." },
+                    en: { name: "Botanical Courtyard & Outdoor Kitchen", desc: "Landscaped olive trees, koi pond, and pergola dining area." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><circle cx="60" cy="48" r="28" fill="#10b981" stroke="#a7f3d0" stroke-width="3"/><rect x="54" y="72" width="12" height="26" fill="#78350f"/><path d="M20 98 Q60 85 100 98" stroke="#34d399" stroke-width="6" fill="none"/></svg>`
+                },
+                {
+                    id: "house_master_suite",
+                    tier: "rare",
+                    baseRatio: 0.15,
+                    ar: { name: "جناح نوم ملكي مع سبا وجاكوزي", desc: "غرفة ماستر فندقية مع خزانة ملابس مضاءة وحمام سبا." },
+                    en: { name: "Penthouse Master Suite & Spa Bath", desc: "King canopy bed, walk-in boutique closet, and rainfall jacuzzi." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="20" y="55" width="80" height="35" rx="8" fill="#f59e0b" stroke="#fef3c7" stroke-width="3"/><rect x="28" y="38" width="28" height="18" rx="5" fill="#fff"/><rect x="64" y="38" width="28" height="18" rx="5" fill="#fff"/></svg>`
+                },
+                {
+                    id: "house_solar_automation",
+                    tier: "common",
+                    baseRatio: 0.11,
+                    ar: { name: "نظام منزل ذكي وطاقة شمسية", desc: "تحكم صوتي كامل بالإضاءة والتكييف والأمان مع توفير الطاقة." },
+                    en: { name: "AI Smart Home & Solar Roof Array", desc: "Automated climate, biometric security, and clean energy." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="22" y="42" width="76" height="46" rx="6" fill="#1d4ed8" stroke="#93c5fd" stroke-width="3"/><line x1="22" y1="65" x2="98" y2="65" stroke="#93c5fd" stroke-width="2"/><line x1="60" y1="42" x2="60" y2="88" stroke="#93c5fd" stroke-width="2"/></svg>`
+                },
+                {
+                    id: "house_velvet_lounge",
+                    tier: "common",
+                    baseRatio: 0.11,
+                    ar: { name: "مجلس وصالة استقبال بثريا كريستال", desc: "أثاث مخملي فاخر مع ثريا كريستالية ومدفأة بانورامية." },
+                    en: { name: "Designer Majlis & Crystal Chandelier", desc: "Bespoke velvet seating with warm fireplace and chandelier." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><circle cx="60" cy="35" r="16" fill="#fde047" stroke="#fff" stroke-width="3"/><rect x="22" y="70" width="76" height="24" rx="10" fill="#ec4899" stroke="#fbcfe8" stroke-width="3"/></svg>`
+                },
+                {
+                    id: "house_gym_sauna",
+                    tier: "common",
+                    baseRatio: 0.10,
+                    ar: { name: "نادي رياضي منزلي وغرفة ساونا", desc: "معدات لياقة متكاملة مع ساونا فنلندية بالخشب العطري." },
+                    en: { name: "Private Fitness Studio & Cedar Sauna", desc: "Full strength rack, cardio zone, and infrared recovery sauna." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><line x1="25" y1="60" x2="95" y2="60" stroke="#cbd5e1" stroke-width="8"/><rect x="18" y="38" width="14" height="44" rx="4" fill="#ef4444"/><rect x="88" y="38" width="14" height="44" rx="4" fill="#ef4444"/></svg>`
+                },
+                {
+                    id: "house_spiral_elevator",
+                    tier: "rare",
+                    baseRatio: 0.13,
+                    ar: { name: "مصعد بانورامي ودرج حلزوني", desc: "تحفة هندسية في وسط الفيلا تربط الطوابق بأناقة." },
+                    en: { name: "Glass Elevator & Floating Staircase", desc: "Architectural centerpiece connecting all levels seamlessly." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="38" y="18" width="44" height="84" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="4"/><line x1="45" y1="35" x2="75" y2="35" stroke="#fbbf24" stroke-width="4"/><line x1="45" y1="55" x2="75" y2="55" stroke="#fbbf24" stroke-width="4"/><line x1="45" y1="75" x2="75" y2="75" stroke="#fbbf24" stroke-width="4"/></svg>`
+                }
+            ],
+            cooking: [
+                {
+                    id: "cook_wagyu_a5",
+                    tier: "legendary",
+                    baseRatio: 0.22,
+                    ar: { name: "لحم واغيو ياباني A5 فاخر", desc: "أفخم قطع اللحم الرخامي في العالم لتحضير طبق رئيسي لا يُنسى." },
+                    en: { name: "Authentic Miyazaki A5 Wagyu Ribeye", desc: "Melt-in-your-mouth marbled beef worthy of 3 Michelin stars." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><ellipse cx="60" cy="60" rx="42" ry="28" fill="#e11d48" stroke="#fecdd3" stroke-width="6"/><path d="M35 55 Q60 45 80 62 M40 68 Q60 60 85 52" stroke="#fff" stroke-width="3" fill="none"/></svg>`
+                },
+                {
+                    id: "cook_truffle_saffron",
+                    tier: "epic",
+                    baseRatio: 0.17,
+                    ar: { name: "كمأة بيضاء إيطالية وزعفران ملكي", desc: "نكهة عطرية نادرة ترفع قيمة أي طبق إلى مستوى المطاعم العالمية." },
+                    en: { name: "White Alba Truffle & Royal Saffron", desc: "Aromatic culinary gold that elevates aroma and presentation." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><circle cx="52" cy="64" r="24" fill="#d97706" stroke="#fef3c7" stroke-width="3"/><path d="M75 35 L95 55 M85 30 L98 48" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/></svg>`
+                },
+                {
+                    id: "cook_wood_oven",
+                    tier: "epic",
+                    baseRatio: 0.16,
+                    ar: { name: "فرن حطب نحاسي وشواية جوسبر", desc: "تحمير مثالي على حرارة عالية مع نكهة تدخين طبيعية." },
+                    en: { name: "Artisan Copper Wood-Fired Oven", desc: "Blistering 900°F heat for smoky crusts and seared meats." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><path d="M20 90 A40 40 0 0 1 100 90 Z" fill="#ea580c" stroke="#fed7aa" stroke-width="4"/><path d="M42 90 A18 18 0 0 1 78 90 Z" fill="#fef08a"/></svg>`
+                },
+                {
+                    id: "cook_damascus_knives",
+                    tier: "rare",
+                    baseRatio: 0.13,
+                    ar: { name: "طقم سكاكين فولاذ دمشقي ياباني", desc: "دقة تقطيع متناهية تضمن تقديم أطباقك بشكل فني متقن." },
+                    en: { name: "Hand-Forged Damascus Chef Knife Set", desc: "Razor-sharp Japanese steel blades for precision plating." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><path d="M22 88 L88 22 L98 32 L45 85 Z" fill="#e2e8f0" stroke="#38bdf8" stroke-width="3"/><rect x="15" y="80" width="22" height="12" transform="rotate(-45 26 86)" fill="#78350f"/></svg>`
+                },
+                {
+                    id: "cook_king_lobster",
+                    tier: "rare",
+                    baseRatio: 0.15,
+                    ar: { name: "لوبستر بحري طازج وكافيار فاخر", desc: "مأكولات بحرية ملكية تضيف لمسة ساحلية فاخرة لقائمتك." },
+                    en: { name: "Fresh Atlantic Lobster & Beluga Caviar", desc: "Luxury seafood duo for an unforgettable appetizer course." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><circle cx="60" cy="65" r="28" fill="#dc2626" stroke="#fca5a5" stroke-width="3"/><circle cx="60" cy="65" r="14" fill="#1e293b"/></svg>`
+                },
+                {
+                    id: "cook_copper_cookware",
+                    tier: "rare",
+                    baseRatio: 0.12,
+                    ar: { name: "أواني طهي نحاسية فرنسية", desc: "توزيع حراري فوري ومثالي لتحضير أشهى الصلصات." },
+                    en: { name: "French Hammered Copper Cookware", desc: "Unmatched thermal control for delicate reductions and sauces." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="25" y="48" width="55" height="34" rx="8" fill="#d97706" stroke="#fde68a" stroke-width="3"/><line x1="80" y1="58" x2="108" y2="46" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/></svg>`
+                },
+                {
+                    id: "cook_molecular_kit",
+                    tier: "common",
+                    baseRatio: 0.11,
+                    ar: { name: "معدات الطهي الجزيئي والنيتروجين", desc: "إبهار بصري مع رغوات النكهات والدخان العطري عند التقديم." },
+                    en: { name: "Molecular Gastronomy & Smoke Cloche", desc: "Theatrical presentation with aromatic mist and flavor pearls." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><path d="M45 25 H75 M52 25 V48 L30 92 H90 L68 48 V25" fill="#38bdf8" fill-opacity="0.4" stroke="#bae6fd" stroke-width="4"/></svg>`
+                },
+                {
+                    id: "cook_organic_herbs",
+                    tier: "common",
+                    baseRatio: 0.09,
+                    ar: { name: "سلة أعشاب عضوية وزيت زيتون معتق", desc: "الأساس الطبيعي الذي يربط نكهات جميع أطباقك بتناغم." },
+                    en: { name: "Heirloom Herb Garden & Aged Olive Oil", desc: "Fresh basil, rosemary, and cold-pressed Tuscan olive oil." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><path d="M60 95 V35 M60 55 C35 45 35 25 60 35 C85 25 85 45 60 55" fill="#10b981" stroke="#a7f3d0" stroke-width="4"/></svg>`
+                },
+                {
+                    id: "cook_valrhona_dessert",
+                    tier: "common",
+                    baseRatio: 0.10,
+                    ar: { name: "شوكولاتة بلجيكية فاخرة وأوراق ذهب 24 قيراط", desc: "ختام ملكي للوليمة مع حلوى مزينة بالذهب الصالح للأكل." },
+                    en: { name: "Valrhona Chocolate & 24K Gold Leaf", desc: "Decadent dessert finale crowned with edible gold leaf." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="28" y="30" width="64" height="64" rx="8" fill="#451a03" stroke="#fbbf24" stroke-width="4"/><circle cx="60" cy="62" r="14" fill="#fbbf24"/></svg>`
+                },
+                {
+                    id: "cook_sous_vide",
+                    tier: "common",
+                    baseRatio: 0.11,
+                    ar: { name: "جهاز طهي بطيء Sous-Vide احترافي", desc: "يضمن طراوة مثالية للحوم والأسماك بدرجة حرارة دقيقة." },
+                    en: { name: "Precision Immersion Sous-Vide Rig", desc: "Locks in juices and guarantees edge-to-edge tenderness." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="46" y="18" width="28" height="84" rx="12" fill="#334155" stroke="#38bdf8" stroke-width="4"/><circle cx="60" cy="40" r="8" fill="#10b981"/></svg>`
+                }
+            ],
+            gaming: [
+                {
+                    id: "game_rtx_pc",
+                    tier: "legendary",
+                    baseRatio: 0.23,
+                    ar: { name: "كمبيوتر خارق RTX 5090 بتبريد مائي", desc: "أقوى أداء للألعاب بدقة 4K و240 إطار مع أنابيب تبريد مضيئة." },
+                    en: { name: "Custom Watercooled RTX 5090 Beast PC", desc: "Maxed-out 4K ray-tracing rig with custom hardline liquid loop." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="30" y="16" width="60" height="88" rx="8" fill="#0f172a" stroke="#a855f7" stroke-width="4"/><circle cx="60" cy="42" r="14" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="60" cy="76" r="14" fill="none" stroke="#ec4899" stroke-width="4"/></svg>`
+                },
+                {
+                    id: "game_oled_monitor",
+                    tier: "epic",
+                    baseRatio: 0.17,
+                    ar: { name: "شاشة منحنية 49 بوصة OLED 240Hz", desc: "انغماس بصري كامل وألوان مبهرة مع زمن استجابة فوري." },
+                    en: { name: "49-Inch Curved OLED Ultrawide 240Hz", desc: "Panoramic immersion with infinite contrast and 0.03ms response." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><path d="M12 35 Q60 46 108 35 V75 Q60 86 12 75 Z" fill="#1e1b4b" stroke="#38bdf8" stroke-width="4"/><path d="M45 96 H75 M60 80 V96" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/></svg>`
+                },
+                {
+                    id: "game_cockpit_chair",
+                    tier: "epic",
+                    baseRatio: 0.15,
+                    ar: { name: "كرسي ألعاب إرجونومي ومكتب كهربائي ذكي", desc: "راحة تامة لجلسات اللعب الطويلة مع تنظيم كابلات مخفي." },
+                    en: { name: "Zero-Gravity Gaming Throne & Smart Desk", desc: "Motorized carbon-texture desk paired with lumbar ergonomic chair." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><path d="M45 20 H75 L80 72 H40 Z" fill="#f43f5e" stroke="#fecdd3" stroke-width="3"/><rect x="20" y="72" width="80" height="10" rx="4" fill="#38bdf8"/></svg>`
+                },
+                {
+                    id: "game_sim_rig",
+                    tier: "rare",
+                    baseRatio: 0.14,
+                    ar: { name: "طقم محاكاة سباقات ونظارة واقع افتراضي VR", desc: "مقود احترافي بدواسات هيدروليكية مع خوذة VR فائقة الدقة." },
+                    en: { name: "Direct-Drive Racing Sim & 8K VR Headset", desc: "Force-feedback wheel, pedals, and next-gen virtual reality." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="25" y="42" width="70" height="36" rx="14" fill="#6366f1" stroke="#e0e7ff" stroke-width="4"/><circle cx="45" cy="60" r="8" fill="#0f172a"/><circle cx="75" cy="60" r="8" fill="#0f172a"/></svg>`
+                },
+                {
+                    id: "game_custom_keeb",
+                    tier: "common",
+                    baseRatio: 0.10,
+                    ar: { name: "كيبورد ميكانيكي مخصص وماوس لاسلكي خفيف", desc: "استجابة فورية للرياضات الإلكترونية مع سويتشات احترافية." },
+                    en: { name: "Custom Aluminum Keyboard & 49g Pro Mouse", desc: "Lubed mechanical switches and 8000Hz wireless esports mouse." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="16" y="46" width="64" height="32" rx="6" fill="#1e293b" stroke="#fbbf24" stroke-width="3"/><rect x="88" y="48" width="18" height="28" rx="9" fill="#ec4899" stroke="#fff" stroke-width="2"/></svg>`
+                },
+                {
+                    id: "game_stream_audio",
+                    tier: "rare",
+                    baseRatio: 0.12,
+                    ar: { name: "مايكروفون بث استوديو وسماعات محيطية", desc: "صوت نقي للبث المباشر مع تحديد دقيق لخطوات الأعداء." },
+                    en: { name: "Broadcast XLR Mic & Audiophile Headset", desc: "Studio vocal clarity with planar magnetic 3D spatial audio." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="46" y="26" width="28" height="46" rx="14" fill="#10b981" stroke="#d1fae5" stroke-width="3"/><path d="M38 55 A22 22 0 0 0 82 55 M60 77 V98 M42 98 H78" stroke="#f8fafc" stroke-width="4" fill="none"/></svg>`
+                },
+                {
+                    id: "game_rgb_acoustic",
+                    tier: "common",
+                    baseRatio: 0.09,
+                    ar: { name: "ألواح عزل صوتي وإضاءة جدارية ذكية RGB", desc: "تحول الغرفة إلى استوديو مستقبلي يتفاعل مع صوت اللعبة." },
+                    en: { name: "Acoustic Hex Panels & Reactive RGB Wall", desc: "Soundproofing foam tiles paired with music-synced neon lights." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><polygon points="60,20 90,38 90,72 60,90 30,72 30,38" fill="#8b5cf6" stroke="#38bdf8" stroke-width="4"/></svg>`
+                },
+                {
+                    id: "game_Dual_cam",
+                    tier: "rare",
+                    baseRatio: 0.12,
+                    ar: { name: "كاميرا احترافية 4K وإضاءة استوديو Stream Deck", desc: "عدة صناع المحتوى الكاملة للبث بجودة سينمائية." },
+                    en: { name: "4K Mirrorless Stream Cam & Key Lights", desc: "DSLR bokeh webcam setup with programmable macro deck." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="26" y="38" width="68" height="48" rx="8" fill="#334155" stroke="#f8fafc" stroke-width="3"/><circle cx="60" cy="62" r="16" fill="#0ea5e9" stroke="#fff" stroke-width="3"/></svg>`
+                },
+                {
+                    id: "game_mini_fridge",
+                    tier: "common",
+                    baseRatio: 0.09,
+                    ar: { name: "ثلاجة مشروبات مضيئة وركن سناكس", desc: "مشروبات باردة في متناول يدك دون مغادرة الغرفة أثناء اللعب." },
+                    en: { name: "RGB Beverage Cooler & Energy Bar", desc: "Glass-door mini fridge stocked for marathon gaming nights." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="34" y="20" width="52" height="80" rx="8" fill="#0f172a" stroke="#22d3ee" stroke-width="4"/><line x1="42" y1="48" x2="78" y2="48" stroke="#22d3ee" stroke-width="3"/><line x1="42" y1="72" x2="78" y2="72" stroke="#22d3ee" stroke-width="3"/></svg>`
+                },
+                {
+                    id: "game_display_shelf",
+                    tier: "common",
+                    baseRatio: 0.10,
+                    ar: { name: "خزانة مجسمات نادرة ومنصة كونسول", desc: "عرض أنيق للمقتنيات النادرة مع أحدث أجهزة الكونسول." },
+                    en: { name: "Collector's Display Vault & Console Dock", desc: "Illuminated glass showcase for rare statues and consoles." },
+                    svg: `<svg viewBox="0 0 120 120" class="w-32 h-32"><rect x="24" y="22" width="72" height="76" rx="6" fill="#1e293b" stroke="#fbbf24" stroke-width="3"/><circle cx="46" cy="52" r="10" fill="#f59e0b"/><circle cx="74" cy="52" r="10" fill="#ec4899"/></svg>`
+                }
+            ]
+        };
+
+        const AVATARS = ["🦅", "🦁", "🦊", "🐯", "🐉", "⚡", "👑", "🚀", "💎", "🔥", "🎯", "🕶️"];
+        const BOT_NAMES = {
+            ar: ["صقر المزاد", "سلطان", "نورة الذكية", "فهد المحترف", "ريم المبدعة"],
+            en: ["Sultan AI", "Falcon Bidder", "Noura Bot", "Apex Tariq", "Layla Pro"]
+        };
+
+        // ============================================================================
+        // 3. SOUND SYNTHESIS ENGINE (TONE.JS - NO EXTERNAL AUDIO FILES)
+        // ============================================================================
+        class SoundManager {
+            constructor() {
+                this.enabled = true;
+                this.initialized = false;
+            }
+            async init() {
+                if (this.initialized) return;
+                try {
+                    await Tone.start();
+                    this.synth = new Tone.PolySynth(Tone.Synth).toDestination();
+                    this.synth.volume.value = -8;
+                    this.initialized = true;
+                } catch (e) {
+                    // AudioContext blocked until interaction
+                }
+            }
+            playBid() {
+                if (!this.enabled) return;
+                this.init();
+                try {
+                    this.synth?.triggerAttackRelease(["C5", "E5"], "16n");
+                } catch (e) {}
+            }
+            playPass() {
+                if (!this.enabled) return;
+                this.init();
+                try {
+                    this.synth?.triggerAttackRelease(["G3", "Eb3"], "16n");
+                } catch (e) {}
+            }
+            playTick(urgent = false) {
+                if (!this.enabled) return;
+                this.init();
+                try {
+                    this.synth?.triggerAttackRelease(urgent ? "A5" : "E4", "32n");
+                } catch (e) {}
+            }
+            playSold() {
+                if (!this.enabled) return;
+                this.init();
+                try {
+                    this.synth?.triggerAttackRelease(["C4", "E4", "G4", "C5"], "8n");
+                } catch (e) {}
+            }
+            playFanfare() {
+                if (!this.enabled) return;
+                this.init();
+                try {
+                    const now = Tone.now();
+                    this.synth?.triggerAttackRelease(["C4", "E4", "G4"], "8n", now);
+                    this.synth?.triggerAttackRelease(["E4", "G4", "C5"], "8n", now + 0.18);
+                    this.synth?.triggerAttackRelease(["G4", "C5", "E5"], "4n", now + 0.36);
+                } catch (e) {}
+            }
+        }
+
+        // ============================================================================
+        // 4. MAIN GAME APPLICATION CONTROLLER
+        // ============================================================================
+        class ZayedGameApp {
+            constructor() {
+                this.lang = "ar"; // Default Arabic as required
+                this.sound = new SoundManager();
+                this.selectedAvatar = AVATARS[0];
+                this.userId = "player_" + Math.random().toString(36).substring(2, 9);
+                this.userName = "";
+                this.lobbyMobileTab = "settings"; // 'settings' | 'players'
+
+                // Firebase state
+                this.db = null;
+                this.auth = null;
+                this.appId = typeof __app_id !== 'undefined' ? __app_id : 'zayed-auction-game';
+                this.roomUnsubscribe = null;
+                this.isCloudConnected = false;
+
+                // Current Room State
+                this.roomCode = null;
+                this.roomState = null;
+
+                // Local Timers for Host Auction Loop
+                this.auctionInterval = null;
+                this.botTimeout = null;
+                this.lastTickSecond = 5;
+                this.showingSoldOverlay = false;
+
+                this.initUI();
+                this.initFirebase();
+            }
+
+            // ------------------------------------------------------------------------
+            // INITIALIZATION & LANGUAGE LOCALIZATION
+            // ------------------------------------------------------------------------
+            initUI() {
+                // Default player name
+                const nameInput = document.getElementById("playerNameInput");
+                nameInput.value = "فارس المزاد";
+
+                this.renderAvatarSelector();
+                this.applyLanguage("ar");
+            }
+
+            async initFirebase() {
+                try {
+                    if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                        const firebaseConfig = JSON.parse(__firebase_config);
+                        const app = initializeApp(firebaseConfig);
+                        this.auth = getAuth(app);
+                        this.db = getFirestore(app);
+
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(this.auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(this.auth);
+                        }
+
+                        if (this.auth.currentUser) {
+                            this.userId = this.auth.currentUser.uid;
+                            this.isCloudConnected = true;
+                        }
+                    }
+                } catch (err) {
+                    // Fallback seamlessly to local memory state if Firebase environment is unavailable
+                    this.isCloudConnected = false;
+                }
+            }
+
+            t(key) {
+                return I18N[this.lang][key] || key;
+            }
+
+            toggleLanguage() {
+                const nextLang = this.lang === "ar" ? "en" : "ar";
+                this.applyLanguage(nextLang);
+            }
+
+            applyLanguage(lang) {
+                this.lang = lang;
+                const htmlEl = document.documentElement;
+                htmlEl.lang = lang;
+                htmlEl.dir = lang === "ar" ? "rtl" : "ltr";
+
+                document.getElementById("langSwitchText").textContent = lang === "ar" ? "EN" : "عربي";
+
+                // Update default name if untouched
+                const nameInput = document.getElementById("playerNameInput");
+                if (nameInput.value === "فارس المزاد" && lang === "en") nameInput.value = "Auctioneer";
+                if (nameInput.value === "Auctioneer" && lang === "ar") nameInput.value = "فارس المزاد";
+
+                // Translate all static [data-i18n] elements
+                document.querySelectorAll("[data-i18n]").forEach(el => {
+                    const key = el.getAttribute("data-i18n");
+                    if (I18N[lang][key]) {
+                        el.textContent = I18N[lang][key];
+                    }
+                });
+
+                // Re-render dynamic views if in a room
+                if (this.roomState) {
+                    this.renderCurrentScreen();
+                }
+            }
+
+            switchLobbyMobileTab(tab) {
+                this.lobbyMobileTab = tab;
+                const settingsPanel = document.getElementById("lobbySettingsPanel");
+                const playersPanel = document.getElementById("lobbyPlayersPanel");
+                const btnSettings = document.getElementById("lobbyTabSettingsBtn");
+                const btnPlayers = document.getElementById("lobbyTabPlayersBtn");
+
+                if (tab === "settings") {
+                    settingsPanel.classList.remove("hidden");
+                    playersPanel.classList.add("hidden");
+                    btnSettings.className = "py-1.5 rounded-2xl text-xs font-bold bg-white text-black transition";
+                    btnPlayers.className = "py-1.5 rounded-2xl text-xs font-medium text-[#8e8d8a] hover:text-white transition flex items-center justify-center gap-1.5";
+                } else {
+                    settingsPanel.classList.add("hidden");
+                    playersPanel.classList.remove("hidden");
+                    playersPanel.classList.add("flex");
+                    btnPlayers.className = "py-1.5 rounded-2xl text-xs font-bold bg-white text-black transition flex items-center justify-center gap-1.5";
+                    btnSettings.className = "py-1.5 rounded-2xl text-xs font-medium text-[#8e8d8a] hover:text-white transition";
+                }
+            }
+
+            toggleSound() {
+                this.sound.enabled = !this.sound.enabled;
+                const icon = document.getElementById("soundIcon");
+                icon.className = this.sound.enabled
+                    ? "fa-solid fa-volume-high text-white text-xs"
+                    : "fa-solid fa-volume-xmark text-[#8e8d8a] text-xs";
+            }
+
+            openRulesModal() {
+                document.getElementById("rulesModal").classList.remove("hidden");
+            }
+
+            closeRulesModal() {
+                document.getElementById("rulesModal").classList.add("hidden");
+            }
+
+            showToast(msg, type = "info") {
+                const container = document.getElementById("toastContainer");
+                const toast = document.createElement("div");
+                const colors = {
+                    info: "bg-[#141413]/95 border-white/20 text-white",
+                    success: "bg-[#141413]/95 border-white/40 text-white",
+                    error: "bg-[#141413]/95 border-rose-500/40 text-rose-200"
+                };
+                toast.className = `px-5 py-3 rounded-full border shadow-2xl text-xs font-medium flex items-center justify-between gap-3 transition-all duration-300 ${colors[type] || colors.info}`;
+                toast.innerHTML = `<span>${msg}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = "0";
+                    setTimeout(() => toast.remove(), 300);
+                }, 2600);
+            }
+
+            renderAvatarSelector() {
+                const container = document.getElementById("avatarSelector");
+                container.innerHTML = AVATARS.slice(0, 6).map(av => `
+                    <button type="button" onclick="window.app.selectAvatar('${av}')"
+                        class="py-1.5 rounded-xl text-base flex items-center justify-center border transition ${this.selectedAvatar === av ? 'bg-white text-black border-white scale-105' : 'bg-black/70 border-white/10 hover:bg-white/10'}">
+                        <span class="${this.selectedAvatar === av ? '' : 'grayscale'}">${av}</span>
+                    </button>
+                `).join("");
+            }
+
+            selectAvatar(av) {
+                this.selectedAvatar = av;
+                this.renderAvatarSelector();
+            }
+
+            // ------------------------------------------------------------------------
+            // ROOM CREATION, JOINING & CLOUD SYNC
+            // ------------------------------------------------------------------------
+            getRoomDocRef(code) {
+                return doc(this.db, 'artifacts', this.appId, 'public', 'data', 'zayed_rooms', code);
+            }
+
+            async syncRoomState(newState) {
+                this.roomState = newState;
+                if (this.isCloudConnected && this.db && this.roomCode) {
+                    try {
+                        await setDoc(this.getRoomDocRef(this.roomCode), newState);
+                    } catch (e) {
+                        this.renderCurrentScreen();
+                    }
+                } else {
+                    this.renderCurrentScreen();
+                }
+            }
+
+            subscribeToRoom(code) {
+                if (this.roomUnsubscribe) {
+                    this.roomUnsubscribe();
+                    this.roomUnsubscribe = null;
+                }
+                if (this.isCloudConnected && this.db) {
+                    this.roomUnsubscribe = onSnapshot(
+                        this.getRoomDocRef(code),
+                        (snapshot) => {
+                            if (snapshot.exists()) {
+                                this.roomState = snapshot.data();
+                                this.renderCurrentScreen();
+                                this.checkHostAutomation();
+                            }
+                        },
+                        (err) => {
+                            console.error("Room snapshot error:", err);
+                        }
+                    );
+                }
+            }
+
+            generateRoomCode() {
+                const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                let code = "";
+                for (let i = 0; i < 5; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return code;
+            }
+
+            async createRoom(withInstantBots = false) {
+                this.sound.init();
+                const rawName = document.getElementById("playerNameInput").value.trim();
+                this.userName = rawName || (this.lang === "ar" ? "اللاعب 1" : "Player 1");
+                this.roomCode = this.generateRoomCode();
+
+                const initialPlayers = {
+                    [this.userId]: {
+                        id: this.userId,
+                        name: this.userName,
+                        avatar: this.selectedAvatar,
+                        isBot: false,
+                        budget: 10000,
+                        items: [],
+                        passedCurrent: false,
+                        votedFor: null
+                    }
+                };
+
+                if (withInstantBots) {
+                    for (let i = 0; i < 2; i++) {
+                        const botId = "bot_" + Math.random().toString(36).substring(2, 8);
+                        initialPlayers[botId] = {
+                            id: botId,
+                            name: BOT_NAMES[this.lang][i],
+                            avatar: AVATARS[(i + 3) % AVATARS.length],
+                            isBot: true,
+                            budget: 10000,
+                            items: [],
+                            passedCurrent: false,
+                            votedFor: null
+                        };
+                    }
+                }
+
+                const newRoom = {
+                    code: this.roomCode,
+                    hostId: this.userId,
+                    status: "lobby", // lobby | auction | voting | results
+                    settings: {
+                        startingBudget: 10000,
+                        itemCount: 6,
+                        category: "cars",
+                        aiJudge: true
+                    },
+                    players: initialPlayers,
+                    auctionQueue: [],
+                    currentItemIndex: 0,
+                    currentBid: 0,
+                    bidStep: 200,
+                    highestBidderId: null,
+                    timerRemaining: 5.0,
+                    lastActionNotice: "",
+                    aiVerdict: null,
+                    updatedAt: Date.now()
+                };
+
+                await this.syncRoomState(newRoom);
+                this.subscribeToRoom(this.roomCode);
+                this.renderCurrentScreen();
+            }
+
+            async quickSoloPlay() {
+                await this.createRoom(true);
+            }
+
+            async joinRoom() {
+                this.sound.init();
+                const codeInput = document.getElementById("joinCodeInput").value.trim().toUpperCase();
+                if (!codeInput) return;
+
+                const rawName = document.getElementById("playerNameInput").value.trim();
+                this.userName = rawName || (this.lang === "ar" ? "مزايد" : "Bidder");
+
+                if (this.isCloudConnected && this.db) {
+                    try {
+                        const snap = await getDoc(this.getRoomDocRef(codeInput));
+                        if (!snap.exists()) {
+                            this.showToast(this.lang === "ar" ? "لم يتم العثور على الغرفة!" : "Room not found!", "error");
+                            return;
+                        }
+                        const data = snap.data();
+                        this.roomCode = codeInput;
+                        data.players[this.userId] = {
+                            id: this.userId,
+                            name: this.userName,
+                            avatar: this.selectedAvatar,
+                            isBot: false,
+                            budget: data.settings.startingBudget,
+                            items: [],
+                            passedCurrent: false,
+                            votedFor: null
+                        };
+                        await this.syncRoomState(data);
+                        this.subscribeToRoom(codeInput);
+                    } catch (e) {
+                        this.showToast("Error joining room", "error");
+                    }
+                } else {
+                    // Offline fallback: create room with that code
+                    await this.createRoom(true);
+                }
+            }
+
+            copyRoomCode() {
+                if (!this.roomCode) return;
+                const tempInput = document.createElement("input");
+                tempInput.value = this.roomCode;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                tempInput.remove();
+                this.showToast(this.t("toastCodeCopied"), "success");
+            }
+
+            confirmLeaveRoom() {
+                if (!this.roomState) return;
+                if (this.auctionInterval) clearInterval(this.auctionInterval);
+                if (this.roomUnsubscribe) this.roomUnsubscribe();
+                this.roomState = null;
+                this.roomCode = null;
+                document.getElementById("headerRoomBadge").classList.add("hidden");
+                this.showScreen("screenHome");
+            }
+
+            isHost() {
+                return this.roomState && this.roomState.hostId === this.userId;
+            }
+
+            // ------------------------------------------------------------------------
+            // LOBBY & HOST SETTINGS MANAGEMENT
+            // ------------------------------------------------------------------------
+            async updateSetting(key, value) {
+                if (!this.isHost() || !this.roomState || this.roomState.status !== "lobby") return;
+                this.roomState.settings[key] = value;
+
+                // Keep all lobby players' starting budgets synced
+                if (key === "startingBudget") {
+                    Object.values(this.roomState.players).forEach(p => {
+                        p.budget = value;
+                    });
+                }
+                await this.syncRoomState(this.roomState);
+            }
+
+            async toggleAiJudge() {
+                if (!this.isHost() || !this.roomState) return;
+                this.roomState.settings.aiJudge = !this.roomState.settings.aiJudge;
+                await this.syncRoomState(this.roomState);
+            }
+
+            async addBotPlayer() {
+                if (!this.isHost() || !this.roomState) return;
+                const playersArr = Object.values(this.roomState.players);
+                if (playersArr.length >= 6) return;
+
+                const botCount = playersArr.filter(p => p.isBot).length;
+                const botId = "bot_" + Math.random().toString(36).substring(2, 8);
+                const botName = BOT_NAMES[this.lang][botCount % BOT_NAMES[this.lang].length];
+
+                this.roomState.players[botId] = {
+                    id: botId,
+                    name: botName,
+                    avatar: AVATARS[(playersArr.length + 2) % AVATARS.length],
+                    isBot: true,
+                    budget: this.roomState.settings.startingBudget,
+                    items: [],
+                    passedCurrent: false,
+                    votedFor: null
+                };
+                await this.syncRoomState(this.roomState);
+            }
+
+            async removeBotPlayer() {
+                if (!this.isHost() || !this.roomState) return;
+                const botIds = Object.keys(this.roomState.players).filter(id => this.roomState.players[id].isBot);
+                if (botIds.length === 0) return;
+                delete this.roomState.players[botIds[botIds.length - 1]];
+                await this.syncRoomState(this.roomState);
+            }
+
+            // ------------------------------------------------------------------------
+            // AUCTION PHASE INITIALIZATION & 5-SECOND COUNTDOWN MECHANICS
+            // ------------------------------------------------------------------------
+            async startAuctionPhase() {
+                if (!this.isHost() || !this.roomState) return;
+                const playersList = Object.values(this.roomState.players);
+                if (playersList.length < 2) {
+                    this.showToast(this.t("toastNeedMinPlayers"), "error");
+                    return;
+                }
+
+                const { category, itemCount, startingBudget } = this.roomState.settings;
+                const pool = [...ITEM_CATALOG[category]];
+                // Shuffle items
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+
+                const selectedItems = pool.slice(0, itemCount).map(item => {
+                    // Scale starting price proportionally to the room's startingBudget & itemCount
+                    const avgPerItemBudget = startingBudget / Math.max(3, itemCount * 0.65);
+                    const rawStart = Math.round((avgPerItemBudget * item.baseRatio * 2.2) / 50) * 50;
+                    const startPrice = Math.max(100, rawStart);
+                    return {
+                        id: item.id,
+                        tier: item.tier,
+                        startPrice
+                    };
+                });
+
+                // Reset all players for the match
+                Object.values(this.roomState.players).forEach(p => {
+                    p.budget = startingBudget;
+                    p.items = [];
+                    p.passedCurrent = false;
+                    p.votedFor = null;
+                });
+
+                const firstItem = selectedItems[0];
+                const step = Math.max(50, Math.round((startingBudget * 0.04) / 50) * 50);
+
+                this.roomState.status = "auction";
+                this.roomState.auctionQueue = selectedItems;
+                this.roomState.currentItemIndex = 0;
+                this.roomState.currentBid = firstItem.startPrice;
+                this.roomState.bidStep = step;
+                this.roomState.highestBidderId = null;
+                this.roomState.timerRemaining = 5.0;
+                this.roomState.lastResolution = null;
+                this.roomState.aiVerdict = null;
+
+                this.sound.playSold();
+                await this.syncRoomState(this.roomState);
+                this.startHostAuctionLoop();
+            }
+
+            checkHostAutomation() {
+                if (!this.isHost() || !this.roomState) return;
+                if (this.roomState.status === "auction" && !this.auctionInterval && !this.showingSoldOverlay) {
+                    this.startHostAuctionLoop();
+                }
+            }
+
+            startHostAuctionLoop() {
+                if (this.auctionInterval) clearInterval(this.auctionInterval);
+                this.lastTickSecond = 5;
+
+                this.auctionInterval = setInterval(async () => {
+                    if (!this.roomState || this.roomState.status !== "auction" || this.showingSoldOverlay) return;
+
+                    this.roomState.timerRemaining = Math.max(0, +(this.roomState.timerRemaining - 0.1).toFixed(1));
+
+                    // Tick sound on whole seconds
+                    const wholeSec = Math.ceil(this.roomState.timerRemaining);
+                    if (wholeSec < this.lastTickSecond && wholeSec > 0) {
+                        this.lastTickSecond = wholeSec;
+                        this.sound.playTick(wholeSec <= 2);
+                    }
+
+                    // Trigger AI Bot decisions randomly during countdown
+                    this.evaluateBotBidding();
+
+                    // Update timer visual locally
+                    this.updateTimerBarUI();
+
+                    // Check if all active players passed or timer reached 0
+                    const activePlayers = Object.values(this.roomState.players).filter(p => !p.passedCurrent);
+                    const onlyHighestBidderLeft = activePlayers.length === 1 && this.roomState.highestBidderId === activePlayers[0].id;
+
+                    if (this.roomState.timerRemaining <= 0 || activePlayers.length === 0 || onlyHighestBidderLeft) {
+                        await this.resolveCurrentItem();
+                    }
+                }, 100);
+            }
+
+            evaluateBotBidding() {
+                if (!this.isHost() || !this.roomState || this.showingSoldOverlay) return;
+                // Only run bot check occasionally (~15% chance per 100ms tick)
+                if (Math.random() > 0.16) return;
+
+                const bots = Object.values(this.roomState.players).filter(p => p.isBot && !p.passedCurrent);
+                if (bots.length === 0) return;
+
+                const bot = bots[Math.floor(Math.random() * bots.length)];
+                if (this.roomState.highestBidderId === bot.id) return;
+
+                const nextBid = this.getNextBidAmount();
+                const currentItem = this.roomState.auctionQueue[this.roomState.currentItemIndex];
+                if (!currentItem) return;
+
+                // Bot valuation threshold (1.8x to 3.4x startPrice)
+                const maxWilling = currentItem.startPrice * (bot.id.charCodeAt(4) % 2 === 0 ? 2.8 : 2.2);
+
+                if (bot.budget >= nextBid && nextBid <= maxWilling) {
+                    this.executeBidForPlayer(bot.id);
+                } else if (nextBid > maxWilling || bot.budget < nextBid) {
+                    bot.passedCurrent = true;
+                    this.syncRoomState(this.roomState);
+                }
+            }
+
+            getNextBidAmount() {
+                if (!this.roomState) return 0;
+                // First bid is at the starting price; subsequent bids add bidStep
+                return this.roomState.highestBidderId === null
+                    ? this.roomState.currentBid
+                    : this.roomState.currentBid + this.roomState.bidStep;
+            }
+
+            async placeBid() {
+                if (!this.roomState || this.roomState.status !== "auction" || this.showingSoldOverlay) return;
+                const me = this.roomState.players[this.userId];
+                if (!me || me.passedCurrent) return;
+
+                if (this.roomState.highestBidderId === this.userId) {
+                    this.showToast(this.t("toastAlreadyHighest"), "info");
+                    return;
+                }
+
+                const nextBid = this.getNextBidAmount();
+                if (me.budget < nextBid) {
+                    this.showToast(this.t("toastInsufficientFunds"), "error");
+                    return;
+                }
+
+                await this.executeBidForPlayer(this.userId);
+            }
+
+            async executeBidForPlayer(playerId) {
+                const nextBid = this.getNextBidAmount();
+                this.roomState.currentBid = nextBid;
+                this.roomState.highestBidderId = playerId;
+                this.roomState.timerRemaining = 5.0; // Reset countdown to 5 seconds!
+                this.lastTickSecond = 5;
+
+                this.sound.playBid();
+                await this.syncRoomState(this.roomState);
+            }
+
+            async passCurrentItem() {
+                if (!this.roomState || this.roomState.status !== "auction" || this.showingSoldOverlay) return;
+                const me = this.roomState.players[this.userId];
+                if (!me || me.passedCurrent) return;
+
+                me.passedCurrent = true;
+                this.sound.playPass();
+                this.showToast(this.t("toastPassedItem"), "info");
+                await this.syncRoomState(this.roomState);
+            }
+
+            async resolveCurrentItem() {
+                if (this.showingSoldOverlay) return;
+                this.showingSoldOverlay = true;
+                if (this.auctionInterval) {
+                    clearInterval(this.auctionInterval);
+                    this.auctionInterval = null;
+                }
+
+                const itemRef = this.roomState.auctionQueue[this.roomState.currentItemIndex];
+                const winnerId = this.roomState.highestBidderId;
+                const winningPrice = this.roomState.currentBid;
+
+                if (winnerId && this.roomState.players[winnerId]) {
+                    const winner = this.roomState.players[winnerId];
+                    winner.budget = Math.max(0, winner.budget - winningPrice);
+                    winner.items.push({
+                        id: itemRef.id,
+                        tier: itemRef.tier,
+                        pricePaid: winningPrice
+                    });
+                    this.roomState.lastResolution = {
+                        sold: true,
+                        winnerName: winner.name,
+                        winnerAvatar: winner.avatar,
+                        amount: winningPrice,
+                        itemId: itemRef.id
+                    };
+                } else {
+                    this.roomState.lastResolution = {
+                        sold: false,
+                        itemId: itemRef.id
+                    };
+                }
+
+                this.sound.playSold();
+                await this.syncRoomState(this.roomState);
+                this.displayItemResolutionBanner();
+
+                // Pause 2.2 seconds before advancing to next item or voting phase
+                setTimeout(async () => {
+                    this.showingSoldOverlay = false;
+                    document.getElementById("itemResultOverlay").classList.add("hidden");
+
+                    if (!this.isHost()) return;
+
+                    const nextIdx = this.roomState.currentItemIndex + 1;
+                    if (nextIdx < this.roomState.auctionQueue.length) {
+                        const nextItem = this.roomState.auctionQueue[nextIdx];
+                        this.roomState.currentItemIndex = nextIdx;
+                        this.roomState.currentBid = nextItem.startPrice;
+                        this.roomState.highestBidderId = null;
+                        this.roomState.timerRemaining = 5.0;
+                        this.roomState.lastResolution = null;
+                        Object.values(this.roomState.players).forEach(p => {
+                            p.passedCurrent = false;
+                        });
+                        await this.syncRoomState(this.roomState);
+                        this.startHostAuctionLoop();
+                    } else {
+                        // All items auctioned -> Move to Voting Phase
+                        this.roomState.status = "voting";
+                        this.roomState.lastResolution = null;
+                        // Have bots automatically cast votes for another player
+                        this.castBotVotes();
+                        await this.syncRoomState(this.roomState);
+                    }
+                }, 2200);
+            }
+
+            displayItemResolutionBanner() {
+                const res = this.roomState?.lastResolution;
+                if (!res) return;
+                const overlay = document.getElementById("itemResultOverlay");
+                const titleEl = document.getElementById("overlayResultTitle");
+                const subEl = document.getElementById("overlayResultSubtitle");
+
+                overlay.classList.remove("hidden");
+                if (res.sold) {
+                    titleEl.textContent = this.t("soldTitle");
+                    titleEl.className = "dot-matrix text-3xl text-white mb-2";
+                    subEl.textContent = `${this.t("wonByText")} ${res.winnerAvatar} ${res.winnerName} ${this.t("forAmountText")} $${res.amount.toLocaleString()}`;
+                } else {
+                    titleEl.textContent = this.t("unsoldTitle");
+                    titleEl.className = "dot-matrix text-3xl text-[#8e8d8a] mb-2";
+                    subEl.textContent = this.t("noOneBidText");
+                }
+            }
+
+            // ------------------------------------------------------------------------
+            // VOTING PHASE & AI JUDGE (GEMINI API + FALLBACK HEURISTIC)
+            // ------------------------------------------------------------------------
+            castBotVotes() {
+                const players = Object.values(this.roomState.players);
+                players.filter(p => p.isBot).forEach(bot => {
+                    const others = players.filter(candidate => candidate.id !== bot.id);
+                    if (others.length === 0) return;
+                    // Bots prefer builds with more items & higher tier items
+                    others.sort((a, b) => (b.items?.length || 0) - (a.items?.length || 0));
+                    bot.votedFor = others[0].id;
+                });
+            }
+
+            async submitPlayerVote(targetPlayerId) {
+                if (!this.roomState || this.roomState.status !== "voting") return;
+                if (targetPlayerId === this.userId) return; // Self-voting strictly disabled
+
+                const me = this.roomState.players[this.userId];
+                if (!me) return;
+
+                me.votedFor = targetPlayerId;
+                this.sound.playBid();
+                await this.syncRoomState(this.roomState);
+
+                // Check if all human players have voted
+                const allVoted = Object.values(this.roomState.players).every(p => p.votedFor !== null);
+                if (allVoted && this.isHost()) {
+                    await this.finalizeMatchResults();
+                }
+            }
+
+            async finalizeMatchResults() {
+                if (!this.isHost() || !this.roomState) return;
+
+                if (this.roomState.settings.aiJudge) {
+                    this.roomState.aiVerdict = await this.evaluateWithAIJudge();
+                } else {
+                    this.roomState.aiVerdict = null;
+                }
+
+                this.roomState.status = "results";
+                this.sound.playFanfare();
+                await this.syncRoomState(this.roomState);
+            }
+
+            async evaluateWithAIJudge() {
+                const category = this.roomState.settings.category;
+                const players = Object.values(this.roomState.players);
+
+                // First compute heuristic best player as reliable base/fallback
+                const tierWeights = { legendary: 45, epic: 30, rare: 20, common: 12 };
+                let bestPlayer = players[0];
+                let bestScore = -1;
+
+                const summaryForPrompt = players.map(p => {
+                    let score = 0;
+                    const itemNames = (p.items || []).map(it => {
+                        score += tierWeights[it.tier] || 10;
+                        const catalogItem = this.findCatalogItem(category, it.id);
+                        return catalogItem ? catalogItem[this.lang].name : it.id;
+                    });
+                    // Bonus for budget efficiency
+                    score += (p.budget / this.roomState.settings.startingBudget) * 8;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestPlayer = p;
+                    }
+                    return {
+                        id: p.id,
+                        name: p.name,
+                        items: itemNames,
+                        budgetLeft: p.budget
+                    };
+                });
+
+                // Try Gemini API for flavorful AI Judge evaluation
+                try {
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                    const promptText = `You are the official AI Judge in the auction game "Zayed" for the theme "${category}".
+Here are the players' final collections:
+${JSON.stringify(summaryForPrompt)}
+Pick the single best player ID based on collection completeness, item quality, and budget management.
+Return JSON with keys: "winnerId" (exact id string), "reason_ar" (2 enthusiastic sentences in Arabic explaining why their build won), and "reason_en" (2 enthusiastic sentences in English).`;
+
+                    const response = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: promptText }] }],
+                            generationConfig: {
+                                responseMimeType: "application/json"
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        const rawJson = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (rawJson) {
+                            const parsed = JSON.parse(rawJson);
+                            const validWinner = this.roomState.players[parsed.winnerId] ? parsed.winnerId : bestPlayer.id;
+                            return {
+                                winnerId: validWinner,
+                                reason_ar: parsed.reason_ar,
+                                reason_en: parsed.reason_en
+                            };
+                        }
+                    }
+                } catch (err) {
+                    // Fallback to rich deterministic AI Judge commentary
+                }
+
+                const winnerItemsAr = (bestPlayer.items || []).map(i => this.findCatalogItem(category, i.id)?.ar.name).filter(Boolean).join("، ");
+                const winnerItemsEn = (bestPlayer.items || []).map(i => this.findCatalogItem(category, i.id)?.en.name).filter(Boolean).join(", ");
+
+                return {
+                    winnerId: bestPlayer.id,
+                    reason_ar: `بعد تحليل جميع المشاريع، تفوقت مجموعة "${bestPlayer.name}" بفضل التوازن المثالي واقتناء قطع استثنائية (${winnerItemsAr || "تشكيلة متكاملة"}) مع إدارة ذكية للميزانية!`,
+                    reason_en: `After evaluating all builds, "${bestPlayer.name}" stood out with superior synergy, high-tier acquisitions (${winnerItemsEn || "balanced build"}), and smart budget discipline!`
+                };
+            }
+
+            async returnToLobby() {
+                if (!this.isHost() || !this.roomState) return;
+                this.roomState.status = "lobby";
+                Object.values(this.roomState.players).forEach(p => {
+                    p.budget = this.roomState.settings.startingBudget;
+                    p.items = [];
+                    p.passedCurrent = false;
+                    p.votedFor = null;
+                });
+                await this.syncRoomState(this.roomState);
+            }
+
+            // ------------------------------------------------------------------------
+            // VIEW RENDERING ENGINE
+            // ------------------------------------------------------------------------
+            findCatalogItem(category, itemId) {
+                const list = ITEM_CATALOG[category] || [];
+                return list.find(i => i.id === itemId) || list[0];
+            }
+
+            showScreen(screenId) {
+                ["screenHome", "screenLobby", "screenAuction", "screenVoting", "screenResults"].forEach(id => {
+                    document.getElementById(id).classList.toggle("hidden", id !== screenId);
+                });
+            }
+
+            renderCurrentScreen() {
+                if (!this.roomState) {
+                    this.showScreen("screenHome");
+                    return;
+                }
+
+                // Update top bar room badge
+                const badge = document.getElementById("headerRoomBadge");
+                badge.classList.remove("hidden");
+                badge.classList.add("flex");
+                document.getElementById("headerRoomCode").textContent = this.roomState.code;
+
+                switch (this.roomState.status) {
+                    case "lobby":
+                        this.showScreen("screenLobby");
+                        this.renderLobbyScreen();
+                        break;
+                    case "auction":
+                        this.showScreen("screenAuction");
+                        this.renderAuctionScreen();
+                        break;
+                    case "voting":
+                        this.showScreen("screenVoting");
+                        this.renderVotingScreen();
+                        break;
+                    case "results":
+                        this.showScreen("screenResults");
+                        this.renderResultsScreen();
+                        break;
+                }
+            }
+
+            renderLobbyScreen() {
+                const { settings, players } = this.roomState;
+                const isHost = this.isHost();
+
+                // Role badge
+                const roleBadge = document.getElementById("hostBadgeIndicator");
+                roleBadge.innerHTML = isHost
+                    ? `<i class="fa-solid fa-crown me-1"></i><span>${this.t("hostRoleBadge")}</span>`
+                    : `<i class="fa-solid fa-user me-1"></i><span>${this.t("guestRoleBadge")}</span>`;
+
+                // 1. Render 4 Categories in Matte Black Bento style
+                const categoriesMeta = [
+                    { id: "cars", code: "01", icon: "🏎️", title: this.t("cat_cars"), desc: this.t("cat_cars_desc") },
+                    { id: "house", code: "02", icon: "🏡", title: this.t("cat_house"), desc: this.t("cat_house_desc") },
+                    { id: "cooking", code: "03", icon: "👨‍🍳", title: this.t("cat_cooking"), desc: this.t("cat_cooking_desc") },
+                    { id: "gaming", code: "04", icon: "🎮", title: this.t("cat_gaming"), desc: this.t("cat_gaming_desc") }
+                ];
+
+                document.getElementById("categoryGrid").innerHTML = categoriesMeta.map(cat => {
+                    const active = settings.category === cat.id;
+                    return `
+                        <button type="button" onclick="window.app.updateSetting('category', '${cat.id}')"
+                            ${!isHost ? 'disabled' : ''}
+                            class="p-2.5 sm:p-3 rounded-2xl text-start border transition flex flex-col justify-between gap-1 ${active ? 'bg-white text-black border-white' : 'widget-subcard text-white hover:border-white/25'}">
+                            <div class="flex items-center justify-between w-full">
+                                <span class="font-semibold text-xs sm:text-sm truncate">${cat.title}</span>
+                                <span class="dot-matrix text-base ${active ? '!text-black' : 'text-white'}">${cat.code}</span>
+                            </div>
+                            <p class="text-[10px] ${active ? 'text-neutral-700' : 'text-[#8e8d8a]'} line-clamp-1">${cat.desc}</p>
+                        </button>
+                    `;
+                }).join("");
+
+                // 2. Highlight active budget button & input
+                document.getElementById("customBudgetInput").value = settings.startingBudget;
+                document.getElementById("customBudgetInput").disabled = !isHost;
+                document.querySelectorAll(".budget-btn").forEach(btn => {
+                    const val = parseInt(btn.getAttribute("data-budget"));
+                    btn.disabled = !isHost;
+                    btn.className = `budget-btn py-1.5 px-1.5 rounded-lg dot-matrix text-xs border transition ${
+                        val === settings.startingBudget
+                            ? "bg-white !text-black border-white"
+                            : "bg-black text-white border-white/10 hover:border-white/30"
+                    }`;
+                });
+
+                // 3. Highlight active itemCount button
+                document.querySelectorAll(".count-btn").forEach(btn => {
+                    const val = parseInt(btn.getAttribute("data-count"));
+                    btn.disabled = !isHost;
+                    btn.className = `count-btn py-2 rounded-lg dot-matrix text-base border transition ${
+                        val === settings.itemCount
+                            ? "bg-white !text-black border-white"
+                            : "bg-black text-white border-white/10 hover:border-white/30"
+                    }`;
+                });
+
+                // 4. AI Judge Toggle state
+                const aiBtn = document.getElementById("aiJudgeToggleBtn");
+                const aiKnob = document.getElementById("aiJudgeKnob");
+                aiBtn.disabled = !isHost;
+                aiBtn.className = `w-12 h-7 rounded-full p-1 transition-colors duration-200 flex items-center shrink-0 ${settings.aiJudge ? 'bg-white justify-end' : 'bg-black border border-white/15 justify-start'}`;
+                if (aiKnob) {
+                    aiKnob.className = `w-5 h-5 rounded-full shadow-md transform transition-transform duration-200 ${settings.aiJudge ? 'bg-black' : 'bg-white/60'}`;
+                }
+
+                // 5. Players list
+                const playersArr = Object.values(players);
+                document.getElementById("playerCountBadge").textContent = `${playersArr.length}/6`;
+                const mobileCountPill = document.getElementById("mobileLobbyCountPill");
+                if (mobileCountPill) mobileCountPill.textContent = `${playersArr.length}/6`;
+                document.getElementById("botControlsBar").classList.toggle("hidden", !isHost);
+
+                document.getElementById("lobbyPlayersList").innerHTML = playersArr.map(p => `
+                    <div class="flex items-center justify-between p-2.5 widget-subcard">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="w-8 h-8 rounded-full bg-black border border-white/10 flex items-center justify-center text-sm grayscale shrink-0">${p.avatar}</div>
+                            <div class="min-w-0">
+                                <div class="font-medium text-white text-xs flex items-center gap-1.5 truncate">
+                                    <span class="truncate">${p.name}</span>
+                                    ${p.id === this.roomState.hostId ? '<i class="fa-solid fa-crown text-white text-[9px]"></i>' : ''}
+                                    ${p.isBot ? '<span class="px-1.5 py-0.2 rounded-full bg-white/10 text-white text-[9px] font-mono">AI</span>' : ''}
+                                </div>
+                                <div class="text-[10px] text-[#8e8d8a] font-mono">$${settings.startingBudget.toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <span class="w-2 h-2 rounded-full bg-white shrink-0"></span>
+                    </div>
+                `).join("");
+
+                document.getElementById("startMatchBtn").classList.toggle("hidden", !isHost);
+                document.getElementById("waitingForHostMsg").classList.toggle("hidden", isHost);
+            }
+
+            updateTimerBarUI() {
+                if (!this.roomState) return;
+                const rem = this.roomState.timerRemaining;
+                const numEl = document.getElementById("countdownNumber");
+                const barEl = document.getElementById("countdownBar");
+                if (numEl) {
+                    numEl.textContent = `${rem.toFixed(1)}`;
+                    numEl.classList.toggle("timer-urgent", rem <= 2.0);
+                }
+                if (barEl) {
+                    const pct = Math.max(0, Math.min(100, (rem / 5.0) * 100));
+                    barEl.style.width = `${pct}%`;
+                }
+            }
+
+            renderAuctionScreen() {
+                const { settings, auctionQueue, currentItemIndex, currentBid, highestBidderId, players } = this.roomState;
+                const me = players[this.userId] || Object.values(players)[0];
+                const currentItemRef = auctionQueue[currentItemIndex];
+                if (!currentItemRef) return;
+
+                const catalogItem = this.findCatalogItem(settings.category, currentItemRef.id);
+                const catIcons = { cars: "🏎️", house: "🏡", cooking: "👨‍🍳", gaming: "🎮" };
+
+                // Header Bar
+                document.getElementById("auctionCategoryIcon").textContent = catIcons[settings.category];
+                document.getElementById("auctionCategoryTitle").textContent = this.t(`cat_${settings.category}`);
+                document.getElementById("currentItemNumber").textContent = currentItemIndex + 1;
+                document.getElementById("totalItemsNumber").textContent = auctionQueue.length;
+                document.getElementById("auctionProgressBar").style.width = `${((currentItemIndex + 1) / auctionQueue.length) * 100}%`;
+
+                document.getElementById("myRemainingBudget").textContent = `$${(me?.budget || 0).toLocaleString()}`;
+                document.getElementById("myItemsWonCount").textContent = (me?.items || []).length;
+
+                // Item Card Details
+                document.getElementById("itemRarityBadge").textContent = this.t(`tier_${currentItemRef.tier}`);
+                document.getElementById("itemSvgContainer").innerHTML = catalogItem.svg;
+                document.getElementById("itemTitle").textContent = catalogItem[this.lang].name;
+                document.getElementById("itemDesc").textContent = catalogItem[this.lang].desc;
+                document.getElementById("itemStartPrice").textContent = `$${currentItemRef.startPrice.toLocaleString()}`;
+                document.getElementById("itemCurrentBid").textContent = `$${currentBid.toLocaleString()}`;
+
+                this.updateTimerBarUI();
+
+                // Highest Bidder Banner
+                const highestBidderEl = document.getElementById("highestBidderDisplay");
+                if (highestBidderId && players[highestBidderId]) {
+                    const leader = players[highestBidderId];
+                    highestBidderEl.innerHTML = `<span class="text-white font-semibold">${leader.avatar} ${leader.name}</span>`;
+                } else {
+                    highestBidderEl.innerHTML = `<span class="text-[#8e8d8a]">${this.t("noBidsYet")}</span>`;
+                }
+
+                // Action Buttons ("شراء" & "ما أريد")
+                const nextBid = this.getNextBidAmount();
+                document.getElementById("nextBidAmountTag").textContent = `$${nextBid.toLocaleString()}`;
+
+                const btnBid = document.getElementById("btnPlaceBid");
+                const btnPass = document.getElementById("btnPassItem");
+                const canAfford = (me?.budget || 0) >= nextBid;
+                const isAlreadyLeader = highestBidderId === this.userId;
+                const hasPassed = me?.passedCurrent;
+
+                btnBid.disabled = hasPassed || isAlreadyLeader || !canAfford;
+                btnPass.disabled = hasPassed || isAlreadyLeader;
+
+                // Mobile Horizontal Bidders Strip
+                const mobileStrip = document.getElementById("mobileBiddersStrip");
+                if (mobileStrip) {
+                    mobileStrip.innerHTML = Object.values(players).map(p => {
+                        const isLeader = highestBidderId === p.id;
+                        return `
+                            <div class="px-2.5 py-1 rounded-full border flex items-center gap-1.5 shrink-0 text-[10px] ${
+                                isLeader
+                                    ? 'bg-white text-black border-white font-bold'
+                                    : p.passedCurrent
+                                        ? 'bg-black/40 text-[#8e8d8a] border-white/5 opacity-45 line-through'
+                                        : 'bg-black/80 text-white border-white/10'
+                            }">
+                                <span class="grayscale">${p.avatar}</span>
+                                <span class="max-w-[65px] truncate">${p.name}</span>
+                                <span class="dot-matrix ${isLeader ? '!text-black' : 'text-[#8e8d8a]'}">$${Math.round(p.budget / 1000)}k</span>
+                            </div>
+                        `;
+                    }).join("");
+                }
+
+                // Live Bidders List (Desktop)
+                document.getElementById("liveBiddersList").innerHTML = Object.values(players).map(p => {
+                    const isLeader = highestBidderId === p.id;
+                    let statusBadge = `<span class="px-2 py-0.5 rounded-full bg-white/10 text-white text-[10px] font-medium shrink-0">${this.t("statusActive")}</span>`;
+                    if (isLeader) {
+                        statusBadge = `<span class="px-2 py-0.5 rounded-full bg-white text-black text-[10px] font-bold shrink-0">${this.t("statusLeading")}</span>`;
+                    } else if (p.passedCurrent) {
+                        statusBadge = `<span class="px-2 py-0.5 rounded-full bg-black text-[#8e8d8a] text-[10px] border border-white/10 shrink-0">${this.t("statusPassed")}</span>`;
+                    }
+
+                    return `
+                        <div class="flex items-center justify-between p-2 rounded-xl border transition ${isLeader ? 'bg-white/10 border-white/40' : p.passedCurrent ? 'bg-black/40 border-white/5 opacity-45' : 'widget-subcard'}">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="text-sm grayscale shrink-0">${p.avatar}</span>
+                                <div class="min-w-0">
+                                    <div class="font-medium text-white text-xs truncate">${p.name}</div>
+                                    <div class="dot-matrix text-xs text-[#8e8d8a]">$${p.budget.toLocaleString()}</div>
+                                </div>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                    `;
+                }).join("");
+
+                // My Current Inventory Grid
+                const myItems = me?.items || [];
+                const invGrid = document.getElementById("myInventoryGrid");
+                if (myItems.length === 0) {
+                    invGrid.innerHTML = `<div class="col-span-full text-center py-4 text-[11px] text-[#8e8d8a]">${this.t("emptyCollectionMsg")}</div>`;
+                } else {
+                    invGrid.innerHTML = myItems.map(won => {
+                        const cItem = this.findCatalogItem(settings.category, won.id);
+                        return `
+                            <div class="p-2 widget-subcard flex flex-col items-center text-center">
+                                <div class="w-7 h-7 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">${cItem.svg}</div>
+                                <div class="text-[10px] font-medium text-white line-clamp-1 mt-1">${cItem[this.lang].name}</div>
+                                <div class="dot-matrix text-[10px] text-[#8e8d8a]">$${won.pricePaid.toLocaleString()}</div>
+                            </div>
+                        `;
+                    }).join("");
+                }
+            }
+
+            renderVotingScreen() {
+                const { settings, players } = this.roomState;
+                const me = players[this.userId];
+                const myVote = me?.votedFor;
+
+                const grid = document.getElementById("votingBuildsGrid");
+                grid.innerHTML = Object.values(players).map(p => {
+                    const isSelf = p.id === this.userId;
+                    const isSelected = myVote === p.id;
+                    const itemsList = p.items || [];
+
+                    const itemsHtml = itemsList.length === 0
+                        ? `<div class="col-span-full py-4 text-center text-[11px] text-[#8e8d8a]">${this.t("emptyCollectionMsg")}</div>`
+                        : itemsList.map(won => {
+                            const cItem = this.findCatalogItem(settings.category, won.id);
+                            return `
+                                <div class="p-2 widget-subcard flex items-center gap-2">
+                                    <div class="w-7 h-7 shrink-0 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">${cItem.svg}</div>
+                                    <div class="min-w-0">
+                                        <div class="text-[11px] font-medium text-white truncate">${cItem[this.lang].name}</div>
+                                        <div class="dot-matrix text-[10px] text-[#8e8d8a]">$${won.pricePaid.toLocaleString()}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join("");
+
+                    let buttonHtml = "";
+                    if (isSelf) {
+                        buttonHtml = `
+                            <div class="w-full py-2 px-3 rounded-full bg-black/60 text-[#8e8d8a] text-[11px] font-medium text-center border border-white/5">
+                                ${this.t("cannotVoteSelf")}
+                            </div>
+                        `;
+                    } else {
+                        buttonHtml = `
+                            <button onclick="window.app.submitPlayerVote('${p.id}')"
+                                class="w-full py-2.5 px-4 rounded-full font-bold text-xs transition flex items-center justify-center gap-1.5 ${
+                                    isSelected
+                                        ? "bg-white text-black"
+                                        : "bg-white/10 hover:bg-white hover:text-black text-white border border-white/15"
+                                }">
+                                <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-plus'}"></i>
+                                <span>${isSelected ? this.t("votedBtnText") : this.t("voteForBuildBtn")}</span>
+                            </button>
+                        `;
+                    }
+
+                    return `
+                        <div class="glass-panel p-4 flex flex-col justify-between space-y-2.5 border ${isSelected ? 'border-white/50' : 'border-white/10'}">
+                            <div class="min-h-0 flex flex-col">
+                                <div class="flex items-center justify-between border-b border-white/10 pb-2 mb-2 shrink-0">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="text-lg grayscale">${p.avatar}</span>
+                                        <div class="min-w-0">
+                                            <h3 class="font-medium text-white text-sm truncate">${p.name}</h3>
+                                            <span class="text-[10px] text-[#8e8d8a] font-mono">$${p.budget.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-end shrink-0">
+                                        <span class="dot-matrix text-xl text-white">${itemsList.length}</span>
+                                        <span class="block text-[9px] text-[#8e8d8a]">${this.t("myItemsWonLabel")}</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-1.5 overflow-y-auto internal-scroll max-h-36 pe-1">
+                                    ${itemsHtml}
+                                </div>
+                            </div>
+                            <div class="shrink-0">${buttonHtml}</div>
+                        </div>
+                    `;
+                }).join("");
+            }
+
+            renderResultsScreen() {
+                const { settings, players, aiVerdict } = this.roomState;
+                const playersArr = Object.values(players);
+
+                // Tally player votes (1 point each) + AI Judge vote (2 points)
+                const scoresMap = {};
+                playersArr.forEach(p => {
+                    scoresMap[p.id] = {
+                        player: p,
+                        playerVotes: 0,
+                        aiPoints: 0,
+                        totalPoints: 0
+                    };
+                });
+
+                playersArr.forEach(voter => {
+                    if (voter.votedFor && scoresMap[voter.votedFor] && voter.votedFor !== voter.id) {
+                        scoresMap[voter.votedFor].playerVotes += 1;
+                        scoresMap[voter.votedFor].totalPoints += 1;
+                    }
+                });
+
+                if (settings.aiJudge && aiVerdict && scoresMap[aiVerdict.winnerId]) {
+                    scoresMap[aiVerdict.winnerId].aiPoints = 2;
+                    scoresMap[aiVerdict.winnerId].totalPoints += 2;
+                }
+
+                const standings = Object.values(scoresMap).sort((a, b) => {
+                    if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+                    if ((b.player.items?.length || 0) !== (a.player.items?.length || 0)) {
+                        return (b.player.items?.length || 0) - (a.player.items?.length || 0);
+                    }
+                    return b.player.budget - a.player.budget;
+                });
+
+                const topWinner = standings[0];
+                document.getElementById("winnerAnnouncementText").textContent =
+                    this.lang === "ar"
+                        ? `الفائز بالمركز الأول: ${topWinner.player.name} (${topWinner.totalPoints} نقاط)`
+                        : `1st Place Winner: ${topWinner.player.name} (${topWinner.totalPoints} PTS)`;
+
+                // AI Judge Verdict Card
+                const aiCard = document.getElementById("aiVerdictCard");
+                if (settings.aiJudge && aiVerdict && players[aiVerdict.winnerId]) {
+                    aiCard.classList.remove("hidden");
+                    const aiChosen = players[aiVerdict.winnerId];
+                    document.getElementById("aiChosenWinnerBadge").textContent = `${aiChosen.name} (+2 ${this.t("pointsUnit")})`;
+                    document.getElementById("aiReasoningParagraph").textContent =
+                        this.lang === "ar" ? aiVerdict.reason_ar : aiVerdict.reason_en;
+                } else {
+                    aiCard.classList.add("hidden");
+                }
+
+                // Render Standings List in Dot-Matrix Widget format
+                document.getElementById("finalStandingsList").innerHTML = standings.map((entry, idx) => {
+                    const p = entry.player;
+                    const itemPills = (p.items || []).map(won => {
+                        const cItem = this.findCatalogItem(settings.category, won.id);
+                        return `<span class="px-2 py-0.5 rounded-full bg-black border border-white/10 text-[10px] text-[#8e8d8a] truncate">${cItem[this.lang].name}</span>`;
+                    }).join("");
+
+                    return `
+                        <div class="glass-panel p-4 border ${idx === 0 ? 'border-white/40' : 'border-white/10'} flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="dot-matrix text-2xl w-9 text-center shrink-0">0${idx + 1}</div>
+                                <div class="text-xl grayscale shrink-0">${p.avatar}</div>
+                                <div class="min-w-0">
+                                    <div class="font-medium text-white text-sm flex items-center gap-1.5">
+                                        <span class="truncate">${p.name}</span>
+                                        ${entry.aiPoints > 0 ? `<span class="px-2 py-0.5 rounded-full bg-white text-black font-bold text-[9px] shrink-0">+2 AI</span>` : ''}
+                                    </div>
+                                    <div class="text-[10px] text-[#8e8d8a] mt-0.5">
+                                        ${this.t("playerVotesLabel")} <strong class="text-white">${entry.playerVotes}</strong> •
+                                        ${this.t("aiBonusLabel")} <strong class="text-white">${entry.aiPoints}</strong> •
+                                        <strong class="text-white font-mono">$${p.budget.toLocaleString()}</strong>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1 mt-1.5">${itemPills}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <div class="dot-matrix text-4xl text-white">${entry.totalPoints}</div>
+                                <div class="metric-pill !py-1 !px-2">
+                                    <i class="fa-solid fa-star text-white text-[9px]"></i>
+                                    <span class="text-[8px] text-[#8e8d8a] font-mono">${this.t("pointsUnit")}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+
+                document.getElementById("playAgainHostBtn").classList.toggle("hidden", !this.isHost());
+            }
+        }
+
+        // Start App on load
+        window.onload = () => {
+            window.app = new ZayedGameApp();
+        };
+    </script>
+</body>
+</html>
