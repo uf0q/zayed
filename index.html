@@ -636,23 +636,25 @@
                 </div>
             </div>
 
-            <!-- Persistent Bottom Launch Bar -->
-            <div class="glass-panel p-2.5 flex items-center justify-between gap-2 shrink-0">
-                <button onclick="window.app.confirmLeaveRoom()"
-                    class="px-3.5 py-2.5 rounded-full bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-200 text-xs font-medium flex items-center gap-1 transition">
-                    <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i>
-                    <span data-i18n="exitBtn">خروج</span>
-                </button>
-                <button id="startMatchBtn" onclick="window.app.startAuctionPhase()"
-                    class="flex-1 py-2.5 px-5 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
-                    <i class="fa-solid fa-gavel"></i>
-                    <span data-i18n="startAuctionBtn">بدء المزاد الآن!</span>
-                </button>
-                <p id="waitingForHostMsg"
-                    class="hidden flex-1 text-center text-xs font-medium text-[#8e8d8a] animate-pulse"
-                    data-i18n="waitingForHostText">
-                    في انتظار مضيف الغرفة لبدء المزاد...
-                </p>
+            <!-- Persistent Bottom Launch Bar (Same dimensions & style as the Main Navigation Bar) -->
+            <div class="shrink-0 w-full px-3 pt-1 pb-2 flex justify-center">
+                <div class="ig-ios-nav w-full max-w-[345px] p-1.5 flex items-center gap-2">
+                    <button onclick="window.app.confirmLeaveRoom()"
+                        class="h-[46px] px-5 rounded-full bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-200 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 shrink-0">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                        <span data-i18n="exitBtn">خروج</span>
+                    </button>
+                    <button id="startMatchBtn" onclick="window.app.startAuctionPhase()"
+                        class="flex-1 h-[46px] px-4 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
+                        <i class="fa-solid fa-gavel"></i>
+                        <span data-i18n="startAuctionBtn">بدء المزاد الآن!</span>
+                    </button>
+                    <p id="waitingForHostMsg"
+                        class="hidden flex-1 h-[46px] flex items-center justify-center text-center text-xs font-medium text-[#8e8d8a] animate-pulse"
+                        data-i18n="waitingForHostText">
+                        في انتظار مضيف الغرفة لبدء المزاد...
+                    </p>
+                </div>
             </div>
         </section>
 
@@ -779,23 +781,25 @@
                 </div>
             </div>
 
-            <!-- Bottom Docked Action Bar (Replaces Bottom Navigation Bar in Auction Screen) -->
-            <div class="glass-panel p-2.5 grid grid-cols-12 gap-2 shrink-0 mb-1">
-                <button id="btnPlaceBid" onclick="window.app.placeBid()"
-                    class="col-span-7 py-3.5 px-4 rounded-full bg-white hover:bg-neutral-200 disabled:opacity-30 disabled:pointer-events-none text-black font-bold text-xs sm:text-sm flex items-center justify-between transition active:scale-95 shadow-lg">
-                    <span class="flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus text-[11px]"></i>
-                        <span data-i18n="buyActionBtn">شراء</span>
-                    </span>
-                    <span id="nextBidAmountTag"
-                        class="px-2.5 py-0.5 rounded-full bg-black text-white dot-matrix text-xs">$1,200</span>
-                </button>
+            <!-- Bottom Docked Action Bar (Same dimensions & style as the Main Navigation Bar) -->
+            <div class="shrink-0 w-full px-3 pt-1 pb-2 flex justify-center">
+                <div class="ig-ios-nav w-full max-w-[345px] p-1.5 grid grid-cols-12 gap-2 items-center">
+                    <button id="btnPlaceBid" onclick="window.app.placeBid()"
+                        class="col-span-7 h-[46px] px-4 rounded-full bg-white hover:bg-neutral-200 disabled:opacity-30 disabled:pointer-events-none text-black font-bold text-xs sm:text-sm flex items-center justify-between transition active:scale-95 shadow-lg">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus text-[11px]"></i>
+                            <span data-i18n="buyActionBtn">شراء</span>
+                        </span>
+                        <span id="nextBidAmountTag"
+                            class="px-2.5 py-0.5 rounded-full bg-black text-white dot-matrix text-xs">$1,200</span>
+                    </button>
 
-                <button id="btnPassItem" onclick="window.app.passCurrentItem()"
-                    class="col-span-5 py-3.5 px-3 rounded-full bg-black hover:bg-white/10 border border-white/15 disabled:opacity-30 disabled:pointer-events-none text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition active:scale-95">
-                    <i class="fa-solid fa-ban text-xs text-rose-400"></i>
-                    <span data-i18n="passActionBtn">رفض المزايدة</span>
-                </button>
+                    <button id="btnPassItem" onclick="window.app.passCurrentItem()"
+                        class="col-span-5 h-[46px] px-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 disabled:opacity-30 disabled:pointer-events-none text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition active:scale-95">
+                        <i class="fa-solid fa-ban text-xs text-rose-400"></i>
+                        <span data-i18n="passActionBtn">رفض المزايدة</span>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -857,17 +861,20 @@
             <div id="finalStandingsList"
                 class="grid grid-cols-1 gap-2 flex-1 min-h-0 overflow-y-auto internal-scroll content-start"></div>
 
-            <!-- Play Again / Return to Lobby Footer Bar -->
-            <div class="flex items-center justify-center gap-2 shrink-0 pt-0.5">
-                <button id="playAgainHostBtn" onclick="window.app.returnToLobby()"
-                    class="flex-1 py-2.5 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-rotate-right"></i>
-                    <span data-i18n="playAgainBtn">جولة جديدة</span>
-                </button>
-                <button onclick="window.app.confirmLeaveRoom()"
-                    class="px-5 py-2.5 rounded-full bg-black/80 hover:bg-black text-white font-medium text-xs border border-white/15 transition">
-                    <span data-i18n="exitToHomeBtn">الرئيسية</span>
-                </button>
+            <!-- Play Again / Return to Lobby Footer Bar (Same dimensions & style as the Main Navigation Bar) -->
+            <div class="shrink-0 w-full px-3 pt-1 pb-2 flex justify-center">
+                <div class="ig-ios-nav w-full max-w-[345px] p-1.5 flex items-center gap-2">
+                    <button id="playAgainHostBtn" onclick="window.app.returnToLobby()"
+                        class="flex-1 h-[46px] px-4 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span data-i18n="playAgainBtn">جولة جديدة</span>
+                    </button>
+                    <button onclick="window.app.confirmLeaveRoom()"
+                        class="flex-1 h-[46px] px-5 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/15 flex items-center justify-center gap-2 transition active:scale-95">
+                        <i class="fa-solid fa-house text-xs"></i>
+                        <span data-i18n="exitToHomeBtn">الرئيسية</span>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -3182,10 +3189,10 @@
                     if (el) el.classList.toggle("hidden", id !== screenId);
                 });
 
-                // Hide the bottom page navigation bar in Lobby and Live Auction so their action bars take its place at the bottom
+                // Hide the bottom page navigation bar in Lobby, Live Auction, Voting, and Results screens
                 const bottomNav = document.getElementById("bottomNavContainer");
                 if (bottomNav) {
-                    const hideNav = screenId === "screenLobby" || screenId === "screenAuction";
+                    const hideNav = ["screenLobby", "screenAuction", "screenVoting", "screenResults"].includes(screenId);
                     bottomNav.classList.toggle("hidden", hideNav);
                     bottomNav.classList.toggle("flex", !hideNav);
                 }
