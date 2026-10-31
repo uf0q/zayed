@@ -493,29 +493,13 @@
                     </div>
                 </div>
 
-                <!-- Two Pill Buttons: LEFT = Dark "لعب سريع (AI)" | RIGHT = White "+ إنشاء غرفة" -->
-                <div class="grid grid-cols-2 gap-2 pt-0.5">
-                    <button onclick="window.app.quickSoloPlay()"
-                        class="py-2.5 px-3 rounded-full bg-[#1a1c20] hover:bg-white/15 border border-white/15 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
-                        <span data-i18n="quickSoloShort">لعب سريع (AI)</span>
-                        <i class="fa-solid fa-robot text-xs"></i>
-                    </button>
+                <!-- Create Room Action Button -->
+                <div class="pt-0.5">
                     <button onclick="window.app.createRoom()"
-                        class="py-2.5 px-3 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-lg">
+                        class="w-full py-2.5 px-3 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow-lg">
                         <span data-i18n="createRoomShort">إنشاء غرفة</span>
                         <i class="fa-solid fa-plus text-xs"></i>
                     </button>
-                </div>
-
-                <!-- Unified Pill Bar: LEFT = "انضمام" Button | RIGHT = "CODE" Input -->
-                <div class="flex items-center bg-[#0b0c0e] border border-white/15 rounded-full p-1">
-                    <button onclick="window.app.joinRoom()"
-                        class="px-5 py-2 rounded-full bg-[#151618] hover:bg-white hover:text-black border border-white/15 text-white font-bold text-xs whitespace-nowrap transition active:scale-95">
-                        <span data-i18n="joinRoomBtn">انضمام</span>
-                    </button>
-                    <input id="joinCodeInput" type="text" maxlength="8"
-                        class="flex-1 bg-transparent px-3 py-1.5 focus:outline-none text-white font-mono text-xs sm:text-sm uppercase text-center tracking-widest"
-                        placeholder="ROOM CODE">
                 </div>
             </div>
         </section>
@@ -523,25 +507,10 @@
         <!-- ==================== SCREEN 2: LOBBY & PLAYERS (MOBILE FRAME) ==================== -->
         <section id="screenLobby" class="hidden h-full w-full flex flex-col gap-2 overflow-hidden">
 
-            <!-- Segmented Switcher -->
-            <div class="grid grid-cols-2 gap-1.5 p-1 glass-panel shrink-0">
-                <button id="lobbyTabPlayersBtn" onclick="window.app.switchLobbyMobileTab('players')"
-                    class="py-1.5 rounded-2xl text-xs font-bold bg-white text-black transition flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-users"></i>
-                    <span data-i18n="playersInRoomTitle">اللاعبون</span>
-                    <span id="mobileLobbyCountPill"
-                        class="px-1.5 py-0.2 rounded-full bg-black/15 text-current dot-matrix text-[10px]">1/6</span>
-                </button>
-                <button id="lobbyTabSettingsBtn" onclick="window.app.switchLobbyMobileTab('settings')"
-                    class="py-1.5 rounded-2xl text-xs font-medium text-[#8e8d8a] hover:text-white transition">
-                    <i class="fa-solid fa-sliders me-1.5"></i><span data-i18n="roomSettingsTitle">إعدادات الغرفة</span>
-                </button>
-            </div>
-
             <!-- Main Lobby Content Area -->
             <div class="flex-1 min-h-0 flex flex-col overflow-hidden">
 
-                <!-- Panel A: Connected Players List & Bot/Online Management -->
+                <!-- Connected Players List & Bot/Online Management -->
                 <div id="lobbyPlayersPanel"
                     class="flex-1 min-h-0 glass-panel p-3.5 flex flex-col justify-between overflow-hidden">
                     <div class="flex flex-col flex-1 min-h-0 space-y-2.5">
@@ -607,82 +576,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Panel B: Host Settings Bento Card -->
-                <div id="lobbySettingsPanel"
-                    class="hidden flex-1 min-h-0 glass-panel p-3.5 flex-col justify-between internal-scroll overflow-y-auto">
-                    <div>
-                        <label class="block text-[10px] text-[#8e8d8a] uppercase tracking-wider mb-1.5"
-                            data-i18n="selectCategoryLabel">1. اختر فئة المشروع:</label>
-                        <div id="categoryGrid" class="grid grid-cols-2 gap-1.5"></div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 my-2">
-                        <!-- Budget Widget -->
-                        <div class="widget-subcard p-2.5 flex flex-col justify-between space-y-1.5">
-                            <div class="flex items-center justify-between">
-                                <label class="block text-[11px] font-medium text-white"
-                                    data-i18n="startingBudgetShort">2. الميزانية</label>
-                                <span class="text-[9px] text-[#8e8d8a] font-mono">USD</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-1" id="budgetOptionsContainer">
-                                <button onclick="window.app.updateSetting('startingBudget', 5000)" data-budget="5000"
-                                    class="budget-btn py-1 px-1 rounded-lg dot-matrix text-[11px] border transition">$5K</button>
-                                <button onclick="window.app.updateSetting('startingBudget', 10000)" data-budget="10000"
-                                    class="budget-btn py-1 px-1 rounded-lg dot-matrix text-[11px] border transition">$10K</button>
-                                <button onclick="window.app.updateSetting('startingBudget', 25000)" data-budget="25000"
-                                    class="budget-btn py-1 px-1 rounded-lg dot-matrix text-[11px] border transition">$25K</button>
-                                <button onclick="window.app.updateSetting('startingBudget', 50000)" data-budget="50000"
-                                    class="budget-btn py-1 px-1 rounded-lg dot-matrix text-[11px] border transition">$50K</button>
-                            </div>
-                            <input id="customBudgetInput" type="number" min="1000" max="1000000" step="500"
-                                onchange="window.app.updateSetting('startingBudget', parseInt(this.value) || 10000)"
-                                class="w-full px-2 py-1 rounded-lg bg-black border border-white/15 text-white dot-matrix text-xs text-center">
-                        </div>
-
-                        <!-- Item Count Widget -->
-                        <div class="widget-subcard p-2.5 flex flex-col justify-between space-y-1.5">
-                            <div class="flex items-center justify-between">
-                                <label class="block text-[11px] font-medium text-white" data-i18n="numItemsShort">3. عدد
-                                    العناصر</label>
-                                <span class="text-[9px] text-[#8e8d8a] font-mono">LOTS</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-1" id="itemCountContainer">
-                                <button onclick="window.app.updateSetting('itemCount', 4)" data-count="4"
-                                    class="count-btn py-1.5 rounded-lg dot-matrix text-xs border transition">04</button>
-                                <button onclick="window.app.updateSetting('itemCount', 6)" data-count="6"
-                                    class="count-btn py-1.5 rounded-lg dot-matrix text-xs border transition">06</button>
-                                <button onclick="window.app.updateSetting('itemCount', 8)" data-count="8"
-                                    class="count-btn py-1.5 rounded-lg dot-matrix text-xs border transition">08</button>
-                                <button onclick="window.app.updateSetting('itemCount', 10)" data-count="10"
-                                    class="count-btn py-1.5 rounded-lg dot-matrix text-xs border transition">10</button>
-                            </div>
-                            <div class="tick-ruler w-full"></div>
-                        </div>
-                    </div>
-
-                    <!-- 4. AI Judge Toggle Strip -->
-                    <div class="widget-subcard p-2.5 flex items-center justify-between gap-2 shrink-0">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <div class="metric-pill">
-                                <i class="fa-solid fa-wand-magic-sparkles text-white text-[9px]"></i>
-                                <span class="text-[8px] text-[#8e8d8a] font-mono">+2PT</span>
-                            </div>
-                            <div class="min-w-0">
-                                <h4 class="font-medium text-white text-xs truncate" data-i18n="aiJudgeTitle">تفعيل الحكم
-                                    الذكي (AI Judge)</h4>
-                                <p class="text-[10px] text-[#8e8d8a] truncate" data-i18n="aiJudgeDesc">يمنح صوتاً بقيمة
-                                    نقطتين لأفضل مشروع!</p>
-                            </div>
-                        </div>
-                        <button id="aiJudgeToggleBtn" onclick="window.app.toggleAiJudge()"
-                            class="w-11 h-6 rounded-full p-0.5 transition-colors duration-200 flex items-center bg-white shrink-0">
-                            <div id="aiJudgeKnob"
-                                class="w-5 h-5 rounded-full bg-black shadow-md transform transition-transform duration-200">
-                            </div>
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <!-- Persistent Bottom Launch Bar (Same dimensions & style as the Main Navigation Bar) -->
@@ -741,8 +634,12 @@
                 <div id="myBudgetCardWidget" class="glass-panel p-3 flex flex-col justify-between relative overflow-hidden">
                     <div class="flex items-center justify-between">
                         <div>
-                            <div class="text-xs font-medium text-emerald-400 leading-none" data-i18n="myRemainingBudgetShort">
-                                ميزانيتك</div>
+                            <div class="flex items-center gap-1.5 leading-none">
+                                <div class="text-xs font-medium text-emerald-400 leading-none" data-i18n="myRemainingBudgetShort">
+                                    ميزانيتك</div>
+                                <span id="myBidDeductionTag" dir="ltr"
+                                    class="hidden dot-matrix text-[10px] !text-rose-400 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded-full leading-none">-$0</span>
+                            </div>
                             <span class="text-[9px] text-[#8e8d8a] font-mono" id="auctionCategoryTitle">السيارات</span>
                         </div>
                         <span id="auctionCategoryIcon" class="text-xs grayscale">🏎️</span>
@@ -2421,11 +2318,10 @@
 
             async joinFromCommunity() {
                 const input = document.getElementById("communityJoinCodeInput");
-                const mainInput = document.getElementById("joinCodeInput");
                 if (input && input.value.trim()) {
-                    mainInput.value = input.value.trim();
+                    const code = input.value.trim().toUpperCase();
                     this.switchBottomNav("create");
-                    await this.joinRoom();
+                    await this.joinRoom(code);
                 } else {
                     await this.startPresetEvent("cars", 10000, 6);
                 }
@@ -2630,18 +2526,53 @@
                 if (modal) modal.classList.add("hidden");
             }
 
-            showToast(message, type = "info") {
+            showToast(message, type = "info", reuseKey = null) {
                 const container = document.getElementById("toastContainer");
                 if (!container) return;
-                const toast = document.createElement("div");
                 const borderStyle = type === "error" ? "border-rose-400/50 text-rose-200" : "border-white/25 text-white";
-                toast.className = `glass-panel px-4 py-2.5 text-xs font-semibold text-center border ${borderStyle} shadow-xl transition-all duration-300`;
+                const baseClass = `glass-panel px-4 py-2.5 text-xs font-semibold text-center border ${borderStyle} shadow-xl transition-all duration-300`;
+
+                if (reuseKey && this.activeToasts && this.activeToasts[reuseKey]) {
+                    const existing = this.activeToasts[reuseKey];
+                    if (existing.el && existing.el.parentNode === container) {
+                        clearTimeout(existing.fadeTimer);
+                        clearTimeout(existing.removeTimer);
+                        existing.el.className = baseClass;
+                        existing.el.style.opacity = "1";
+                        existing.el.textContent = message;
+                        existing.fadeTimer = setTimeout(() => {
+                            existing.el.style.opacity = "0";
+                            existing.removeTimer = setTimeout(() => {
+                                existing.el.remove();
+                                delete this.activeToasts[reuseKey];
+                            }, 300);
+                        }, 2400);
+                        return;
+                    }
+                }
+
+                const toast = document.createElement("div");
+                toast.className = baseClass;
                 toast.textContent = message;
                 container.appendChild(toast);
-                setTimeout(() => {
+
+                const fadeTimer = setTimeout(() => {
                     toast.style.opacity = "0";
-                    setTimeout(() => toast.remove(), 300);
+                    const removeTimer = setTimeout(() => {
+                        toast.remove();
+                        if (reuseKey && this.activeToasts) {
+                            delete this.activeToasts[reuseKey];
+                        }
+                    }, 300);
+                    if (reuseKey && this.activeToasts && this.activeToasts[reuseKey]) {
+                        this.activeToasts[reuseKey].removeTimer = removeTimer;
+                    }
                 }, 2400);
+
+                if (reuseKey) {
+                    if (!this.activeToasts) this.activeToasts = {};
+                    this.activeToasts[reuseKey] = { el: toast, fadeTimer, removeTimer: null };
+                }
             }
 
             getRoomDocRef(code) {
@@ -2711,6 +2642,7 @@
                 const startLots = this.quickLots || 6;
                 const botsToCreate = this.quickBotsCount !== undefined ? this.quickBotsCount : 3;
                 this.displayedMyBudget = null;
+                this.botToastSeq = 0;
 
                 const initialPlayers = {
                     [this.userId]: {
@@ -2772,9 +2704,10 @@
                 await this.createRoom(true);
             }
 
-            async joinRoom() {
+            async joinRoom(explicitCode = null) {
                 this.sound.init();
-                const codeInput = document.getElementById("joinCodeInput").value.trim().toUpperCase();
+                const el = document.getElementById("joinCodeInput");
+                const codeInput = (explicitCode || (el ? el.value : "")).trim().toUpperCase();
                 if (!codeInput) return;
 
                 const rawName = document.getElementById("playerNameInput").value.trim();
@@ -2885,7 +2818,7 @@
                 if (!this.isHost() || !this.roomState) return;
                 const playersArr = Object.values(this.roomState.players);
                 if (playersArr.length >= 11) {
-                    this.showToast(this.lang === "ar" ? "الحد الأقصى هو 10 أشخاص مضافين معك!" : "Maximum 10 added players reached!", "info");
+                    this.showToast(this.lang === "ar" ? "الحد الأقصى هو 10 أشخاص مضافين معك!" : "Maximum 10 added players reached!", "info", "bot_toast");
                     return;
                 }
 
@@ -2903,8 +2836,13 @@
                     passedCurrent: false,
                     votedFor: null
                 };
+                this.botToastSeq = (this.botToastSeq || 0) + 1;
                 this.sound.playTick(false);
-                this.showToast(this.lang === "ar" ? `تمت إضافة ${botName} 🤖` : `Added ${botName} 🤖`, "success");
+                this.showToast(
+                    this.lang === "ar" ? `تمت إضافة البوت ${this.botToastSeq} 🤖` : `Added Bot ${this.botToastSeq} 🤖`,
+                    "success",
+                    "bot_toast"
+                );
                 await this.syncRoomState(this.roomState);
             }
 
@@ -2917,15 +2855,16 @@
                 } else {
                     const botIds = Object.keys(this.roomState.players).filter(id => this.roomState.players[id].isBot);
                     if (botIds.length === 0) {
-                        this.showToast(this.lang === "ar" ? "لا توجد بوتات لحذفها!" : "No bots to remove!", "info");
+                        this.showToast(this.lang === "ar" ? "لا توجد بوتات لحذفها!" : "No bots to remove!", "info", "bot_toast");
                         return;
                     }
                     const lastId = botIds[botIds.length - 1];
                     removedName = this.roomState.players[lastId].name;
                     delete this.roomState.players[lastId];
                 }
+                this.botToastSeq = Math.max(0, (this.botToastSeq || 1) - 1);
                 this.sound.playPass();
-                this.showToast(this.lang === "ar" ? `تمت إزالة ${removedName || "البوت"}` : `Removed ${removedName || "bot"}`, "info");
+                this.showToast(this.lang === "ar" ? `تمت إزالة ${removedName || "البوت"}` : `Removed ${removedName || "bot"}`, "info", "bot_toast");
                 await this.syncRoomState(this.roomState);
             }
 
@@ -3619,6 +3558,19 @@
                 const currentMyBudget = me?.budget ?? settings.startingBudget;
                 const budgetBarPct = Math.max(0, Math.min(100, (currentMyBudget / settings.startingBudget) * 100));
                 document.getElementById("auctionProgressBar").style.width = `${budgetBarPct}%`;
+
+                const deductTag = document.getElementById("myBidDeductionTag");
+                if (deductTag) {
+                    const isMyActiveBid = highestBidderId === this.userId && currentBid > 0;
+                    const isMyPendingWin = this.roomState.lastResolution?.sold && this.roomState.lastResolution?.winnerId === this.userId;
+                    const deductAmount = isMyPendingWin ? this.roomState.lastResolution.amount : (isMyActiveBid ? currentBid : 0);
+                    if (deductAmount > 0) {
+                        deductTag.textContent = `-$${deductAmount.toLocaleString()}`;
+                        deductTag.classList.remove("hidden");
+                    } else {
+                        deductTag.classList.add("hidden");
+                    }
+                }
 
                 if (this.displayedMyBudget === null) {
                     this.displayedMyBudget = currentMyBudget;
