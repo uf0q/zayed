@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#0b0c0e">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="زايد">
     <link rel="icon" type="image/png" href="zaid.png">
     <link rel="apple-touch-icon" href="zaid.png">
@@ -59,24 +59,27 @@
             -webkit-user-drag: none;
         }
 
-        html,
-        body {
-            position: fixed;
-            inset: 0;
-            height: 100dvh;
-            width: 100vw;
+        html {
+            height: 100%;
+            width: 100%;
             overflow: hidden;
             overscroll-behavior: none;
-            touch-action: none;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            background-color: #0b0c0e;
             -webkit-text-size-adjust: 100%;
         }
 
         body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+            margin: 0;
+            padding-top: max(0.625rem, env(safe-area-inset-top));
+            padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
             font-family: 'Cairo', 'Inter', sans-serif;
             background-color: #0b0c0e;
             background-image: radial-gradient(circle at 50% 0%, #1d2026 0%, #0b0c0e 70%);
@@ -2170,23 +2173,13 @@
                 const nameInput = document.getElementById("playerNameInput");
                 if (nameInput) nameInput.value = "فارس المزاد";
 
-                let lastTouchEnd = 0;
-                document.addEventListener("touchend", (e) => {
-                    const now = Date.now();
-                    if (now - lastTouchEnd <= 300) {
-                        e.preventDefault();
-                    }
-                    lastTouchEnd = now;
-                }, { passive: false });
+                // Keep viewport locked in place after closing iOS keyboard in Home Screen mode
+                document.addEventListener("focusout", () => {
+                    setTimeout(() => window.scrollTo(0, 0), 50);
+                });
 
                 document.addEventListener("dblclick", (e) => {
                     e.preventDefault();
-                }, { passive: false });
-
-                document.addEventListener("touchmove", (e) => {
-                    if (e.touches.length > 1) {
-                        e.preventDefault();
-                    }
                 }, { passive: false });
 
                 ["gesturestart", "gesturechange", "gestureend"].forEach(evt => {
