@@ -1301,61 +1301,32 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL: iOS / PHONE ADD TO HOME SCREEN SHEET ==================== -->
+    <!-- ==================== MODAL: CENTERED INSTALL CONFIRMATION (YES / NO) ==================== -->
     <div id="installAppModal"
-        class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-3">
-        <div class="glass-panel max-w-sm w-full p-4 space-y-3.5 text-center border border-white/20 shadow-2xl"
-            dir="rtl">
-            <!-- Header -->
-            <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
-                <div class="flex items-center gap-2">
-                    <img src="zaid.png" alt="زايد" class="w-8 h-8 rounded-xl object-cover border border-white/20">
-                    <div class="text-right">
-                        <h3 class="text-xs font-bold text-white leading-tight" data-i18n="installModalTitle">إضافة تطبيق
-                            زايد إلى الصفحة الرئيسية</h3>
-                        <span class="text-[10px] text-[#8e8d8a] font-mono">iPhone / iOS Home Screen</span>
-                    </div>
-                </div>
-                <button onclick="window.app.closeInstallModal()"
-                    class="w-7 h-7 rounded-full bg-white/10 text-[#8e8d8a] hover:text-white flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <!-- Direct Interactive iOS "Add to Home Screen" Action Option -->
-            <button onclick="window.app.triggerIosHomeScreenShare()"
-                class="w-full p-3.5 rounded-2xl bg-white hover:bg-neutral-200 text-black font-bold text-xs flex items-center justify-between transition active:scale-[0.98] shadow-lg">
-                <div class="flex items-center gap-2.5">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center text-sm shrink-0">
-                        <i class="fa-regular fa-square-plus"></i>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-xs font-extrabold text-black">إضافة إلى الصفحة الرئيسية</div>
-                        <div class="text-[10px] text-neutral-600 font-medium">Add to Home Screen (iPhone)</div>
-                    </div>
-                </div>
-                <i class="fa-solid fa-arrow-up-from-bracket text-sm text-black me-1"></i>
-            </button>
-
-            <!-- Step-by-step visual guide inside the iPhone Share Menu -->
-            <div id="iosInstallHintBox" class="p-3 widget-subcard text-right text-[11px] text-[#8e8d8a] space-y-1.5">
-                <div class="flex items-center gap-2 text-white font-semibold">
-                    <i class="fa-brands fa-apple text-sm"></i>
-                    <span data-i18n="installIosTitle">خطوة التثبيت السريعة للآيفون:</span>
-                </div>
-                <p class="leading-relaxed">
-                    من القائمة التي ظهرت لك (أو بالضغط على زر المشاركة <i
-                        class="fa-solid fa-arrow-up-from-bracket text-white mx-0.5"></i> بالأسفل)، اختر <strong
-                        class="text-white">"إضافة إلى الصفحة الرئيسية" (Add to Home Screen)</strong> ثم اضغط <strong
-                        class="text-white">"إضافة"</strong>.
+        class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel max-w-xs w-full p-5 space-y-4 text-center border border-white/20 shadow-2xl" dir="rtl">
+            <div class="flex flex-col items-center gap-2.5 pt-1">
+                <img src="zaid.png" alt="زايد" class="w-16 h-16 rounded-2xl object-cover border border-white/20 shadow-xl">
+                <h3 class="text-sm font-bold text-white leading-relaxed" data-i18n="installConfirmQuestion">
+                    هل تريد تثبيته على سطح المكتب؟
+                </h3>
+                <p class="text-[11px] text-[#8e8d8a]" data-i18n="installConfirmSub">
+                    سيتم تنزيل اختصار تطبيق زايد إلى الشاشة الرئيسية لهاتفك
                 </p>
             </div>
 
-            <button onclick="window.app.closeInstallModal()"
-                class="w-full py-2 rounded-full bg-white/10 hover:bg-white/15 text-white font-semibold text-xs transition">
-                إغلاق
-            </button>
+            <div class="grid grid-cols-2 gap-2.5 pt-1">
+                <button onclick="window.app.confirmInstallApp()"
+                    class="py-2.5 px-4 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs transition active:scale-95 shadow-lg"
+                    data-i18n="yesBtn">
+                    نعم
+                </button>
+                <button onclick="window.app.closeInstallModal()"
+                    class="py-2.5 px-4 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white font-semibold text-xs transition active:scale-95"
+                    data-i18n="noBtn">
+                    لا
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1409,12 +1380,10 @@
                 prefSoundLabel: "المؤثرات الصوتية للمزاد",
                 prefInstallAppLabel: "تثبيت التطبيق على سطح المكتب للهاتف",
                 installAppBtn: "تثبيت",
-                installModalTitle: "تثبيت تطبيق زايد على الهاتف",
-                installModalSub: "ثبّت التطبيق على الشاشة الرئيسية لهاتفك للوصول السريع بكامل الشاشة:",
-                installIosTitle: "لأجهزة iPhone / iPad (سفاري):",
-                installIosDesc: "اضغط على أيقونة المشاركة في شريط المتصفح، ثم اختر 'إضافة إلى الشاشة الرئيسية'.",
-                installAndroidTitle: "لأجهزة Android (كروم):",
-                installAndroidDesc: "اضغط على قائمة المتصفح (⋮) أعلى الشاشة، ثم اختر 'تثبيت التطبيق' أو 'الإضافة إلى الشاشة الرئيسية'.",
+                installConfirmQuestion: "هل تريد تثبيته على سطح المكتب؟",
+                installConfirmSub: "سيتم تنزيل اختصار تطبيق زايد إلى الشاشة الرئيسية لهاتفك",
+                yesBtn: "نعم",
+                noBtn: "لا",
                 heroBadge: "مزادات سريعة • ذكاء اصطناعي • تحدي الأصدقاء",
                 heroHeadline: "زايد بذكاء، اصنع مجموعتك، واكسب تصويت الجميع!",
                 heroDescription: "4 فئات للمزايدة • ميزانية متساوية • تقييم الحكم الذكي",
@@ -1552,12 +1521,10 @@
                 prefSoundLabel: "Auction Sound Effects",
                 prefInstallAppLabel: "Install App to Phone Home Screen",
                 installAppBtn: "Install",
-                installModalTitle: "Install Zayed App on Phone",
-                installModalSub: "Add the app to your phone home screen for instant full-screen access:",
-                installIosTitle: "iPhone / iPad (Safari):",
-                installIosDesc: "Tap the Share icon in the browser bar, then select 'Add to Home Screen'.",
-                installAndroidTitle: "Android (Chrome):",
-                installAndroidDesc: "Tap the browser menu (⋮) at the top, then select 'Install app' or 'Add to Home screen'.",
+                installConfirmQuestion: "Do you want to install it to the Home Screen?",
+                installConfirmSub: "Zayed app shortcut will be downloaded to your phone home screen",
+                yesBtn: "Yes",
+                noBtn: "No",
                 heroBadge: "5s Blitz Auctions • AI Judge • Multiplayer",
                 heroHeadline: "Bid Smart, Build Your Collection & Win!",
                 heroDescription: "4 Project Themes • Equal Budget • AI Judge Rating",
@@ -2676,17 +2643,8 @@
                 if (modal) modal.classList.add("hidden");
             }
 
-            async installAppToHomeScreen() {
+            installAppToHomeScreen() {
                 this.sound.playTick(false);
-                if (this.deferredInstallPrompt) {
-                    this.deferredInstallPrompt.prompt();
-                    const { outcome } = await this.deferredInstallPrompt.userChoice;
-                    if (outcome === "accepted") {
-                        this.deferredInstallPrompt = null;
-                    }
-                    return;
-                }
-
                 const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
                 if (isStandalone) {
                     this.showToast(
@@ -2696,25 +2654,117 @@
                     return;
                 }
 
+                // Always show the centered Yes/No confirmation modal first
                 const modal = document.getElementById("installAppModal");
                 if (modal) modal.classList.remove("hidden");
-
-                // Automatically open the iPhone native Share Sheet (which contains "إضافة إلى الشاشة الرئيسية")
-                await this.triggerIosHomeScreenShare();
             }
 
-            async triggerIosHomeScreenShare() {
-                if (navigator.share) {
-                    try {
-                        await navigator.share({
-                            title: "زايد | Zayed",
-                            text: "لعبة المزادات والتقييم",
-                            url: window.location.href
-                        });
-                    } catch (e) {
-                        // User closed share sheet; modal remains visible with option
+            async confirmInstallApp() {
+                this.sound.playBid();
+                this.closeInstallModal();
+
+                if (this.deferredInstallPrompt) {
+                    this.deferredInstallPrompt.prompt();
+                    const { outcome } = await this.deferredInstallPrompt.userChoice;
+                    if (outcome === "accepted") {
+                        this.deferredInstallPrompt = null;
                     }
+                    return;
                 }
+
+                // Automatically generate and download iOS Home Screen WebClip (.mobileconfig) with zaid.png icon
+                await this.downloadIosWebClipProfile();
+            }
+
+            async getIconBase64() {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.onload = () => {
+                        try {
+                            const canvas = document.createElement("canvas");
+                            canvas.width = 180;
+                            canvas.height = 180;
+                            const ctx = canvas.getContext("2d");
+                            ctx.drawImage(img, 0, 0, 180, 180);
+                            const dataUrl = canvas.toDataURL("image/png");
+                            resolve(dataUrl.split(",")[1] || "");
+                        } catch (e) {
+                            resolve("");
+                        }
+                    };
+                    img.onerror = () => resolve("");
+                    img.src = "zaid.png";
+                });
+            }
+
+            async downloadIosWebClipProfile() {
+                const appUrl = window.location.href.split("#")[0];
+                const iconBase64 = await this.getIconBase64();
+                const iconBlock = iconBase64
+                    ? `<key>Icon</key>\n            <data>${iconBase64}</data>`
+                    : "";
+
+                const mobileConfigXml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>FullScreen</key>
+            <true/>
+            ${iconBlock}
+            <key>IgnoreManifestScope</key>
+            <true/>
+            <key>IsRemovable</key>
+            <true/>
+            <key>Label</key>
+            <string>زايد</string>
+            <key>PayloadDescription</key>
+            <string>تثبيت تطبيق زايد على الشاشة الرئيسية</string>
+            <key>PayloadDisplayName</key>
+            <string>تطبيق زايد (Zayed)</string>
+            <key>PayloadIdentifier</key>
+            <string>com.zayed.auction.webclip</string>
+            <key>PayloadType</key>
+            <string>com.apple.webClip.managed</string>
+            <key>PayloadUUID</key>
+            <string>8A7E5B20-4C11-4E8A-9B12-112233445566</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>Precomposed</key>
+            <true/>
+            <key>URL</key>
+            <string>${appUrl}</string>
+        </dict>
+    </array>
+    <key>PayloadDescription</key>
+    <string>تثبيت اختصار تطبيق زايد مباشرة على الشاشة الرئيسية للآيفون</string>
+    <key>PayloadDisplayName</key>
+    <string>زايد | Zayed</string>
+    <key>PayloadIdentifier</key>
+    <string>com.zayed.auction.profile</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>9B8F6C31-5D22-4F9B-8C23-223344556677</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>`;
+
+                const blob = new Blob([mobileConfigXml], { type: "application/x-apple-aspen-config" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "zayed-app.mobileconfig";
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 3000);
             }
 
             closeInstallModal() {
