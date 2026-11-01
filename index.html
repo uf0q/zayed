@@ -6,6 +6,16 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>زايد | Zayed - لعبة المزادات والتقييم</title>
+    <!-- PWA & Mobile Home Screen App Icon (zaid.png) -->
+    <meta name="theme-color" content="#0b0c0e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="زايد">
+    <link rel="icon" type="image/png" href="zaid.png">
+    <link rel="apple-touch-icon" href="zaid.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="zaid.png">
+    <link id="appManifestLink" rel="manifest" href="manifest.json">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Cairo, Inter & Dot-Matrix (Doto / Silkscreen) -->
@@ -1113,7 +1123,20 @@
                         </div>
                     </div>
 
-                    <!-- 3. Help & Rules Row + 3-Dots More Menu Button -->
+                    <!-- 3. Install App to Phone Home Screen Row -->
+                    <div class="flex items-center justify-between widget-subcard px-3 py-2">
+                        <button onclick="window.app.installAppToHomeScreen()"
+                            class="px-3 py-1 rounded-full bg-white text-black hover:bg-neutral-200 font-bold text-[10px] flex items-center gap-1 transition active:scale-95">
+                            <i class="fa-solid fa-download text-[9px]"></i>
+                            <span data-i18n="installAppBtn">تثبيت</span>
+                        </button>
+                        <div class="flex items-center gap-2" dir="rtl">
+                            <img src="zaid.png" alt="زايد" class="w-5 h-5 rounded-md object-cover border border-white/15 shrink-0">
+                            <span class="text-[11px] font-medium text-white" data-i18n="prefInstallAppLabel">تثبيت التطبيق على سطح المكتب للهاتف</span>
+                        </div>
+                    </div>
+
+                    <!-- 4. Help & Rules Row + 3-Dots More Menu Button -->
                     <div class="flex items-center gap-1.5">
                         <!-- 3-Dots Menu Button -->
                         <div class="relative shrink-0">
@@ -1254,6 +1277,51 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL: INSTALL APP TO HOME SCREEN ==================== -->
+    <div id="installAppModal"
+        class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel max-w-sm w-full p-5 space-y-4 text-center" dir="rtl">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button text-white"></i>
+                    <span data-i18n="installModalTitle">تثبيت تطبيق زايد على الهاتف</span>
+                </h3>
+                <button onclick="window.app.closeInstallModal()" class="text-[#8e8d8a] hover:text-white text-base">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="flex flex-col items-center gap-2 py-1">
+                <img src="zaid.png" alt="زايد" class="w-20 h-20 rounded-2xl object-cover border border-white/20 shadow-xl">
+                <div class="text-sm font-bold text-white">زايد | ZAYED</div>
+                <p class="text-[11px] text-[#8e8d8a]" data-i18n="installModalSub">ثبّت التطبيق على الشاشة الرئيسية لهاتفك للوصول السريع بكامل الشاشة:</p>
+            </div>
+
+            <div class="space-y-2 text-right text-xs text-[#8e8d8a]">
+                <div class="p-3 widget-subcard flex items-start gap-2.5">
+                    <i class="fa-brands fa-apple text-white text-base mt-0.5 shrink-0"></i>
+                    <div>
+                        <strong class="text-white block mb-0.5" data-i18n="installIosTitle">لأجهزة iPhone / iPad (سفاري):</strong>
+                        <span data-i18n="installIosDesc">اضغط على أيقونة المشاركة <i class="fa-solid fa-arrow-up-from-bracket text-white mx-0.5"></i> في شريط المتصفح، ثم اختر "إضافة إلى الشاشة الرئيسية".</span>
+                    </div>
+                </div>
+                <div class="p-3 widget-subcard flex items-start gap-2.5">
+                    <i class="fa-brands fa-android text-emerald-400 text-base mt-0.5 shrink-0"></i>
+                    <div>
+                        <strong class="text-white block mb-0.5" data-i18n="installAndroidTitle">لأجهزة Android (كروم):</strong>
+                        <span data-i18n="installAndroidDesc">اضغط على قائمة المتصفح (⋮) أعلى الشاشة، ثم اختر "تثبيت التطبيق" أو "الإضافة إلى الشاشة الرئيسية".</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="window.app.closeInstallModal()"
+                class="w-full py-2.5 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs transition"
+                data-i18n="gotItBtn">
+                فهمت، لنبدأ!
+            </button>
+        </div>
+    </div>
+
     <!-- Application & Firebase Multiplayer Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -1302,6 +1370,14 @@
                 statWonItemsTitle: "القطع المملوكة",
                 prefLanguageLabel: "لغة التطبيق (العربية / الإنجليزية)",
                 prefSoundLabel: "المؤثرات الصوتية للمزاد",
+                prefInstallAppLabel: "تثبيت التطبيق على سطح المكتب للهاتف",
+                installAppBtn: "تثبيت",
+                installModalTitle: "تثبيت تطبيق زايد على الهاتف",
+                installModalSub: "ثبّت التطبيق على الشاشة الرئيسية لهاتفك للوصول السريع بكامل الشاشة:",
+                installIosTitle: "لأجهزة iPhone / iPad (سفاري):",
+                installIosDesc: "اضغط على أيقونة المشاركة في شريط المتصفح، ثم اختر 'إضافة إلى الشاشة الرئيسية'.",
+                installAndroidTitle: "لأجهزة Android (كروم):",
+                installAndroidDesc: "اضغط على قائمة المتصفح (⋮) أعلى الشاشة، ثم اختر 'تثبيت التطبيق' أو 'الإضافة إلى الشاشة الرئيسية'.",
                 heroBadge: "مزادات سريعة • ذكاء اصطناعي • تحدي الأصدقاء",
                 heroHeadline: "زايد بذكاء، اصنع مجموعتك، واكسب تصويت الجميع!",
                 heroDescription: "4 فئات للمزايدة • ميزانية متساوية • تقييم الحكم الذكي",
@@ -1437,6 +1513,14 @@
                 statWonItemsTitle: "Items Won",
                 prefLanguageLabel: "App Language (AR / EN)",
                 prefSoundLabel: "Auction Sound Effects",
+                prefInstallAppLabel: "Install App to Phone Home Screen",
+                installAppBtn: "Install",
+                installModalTitle: "Install Zayed App on Phone",
+                installModalSub: "Add the app to your phone home screen for instant full-screen access:",
+                installIosTitle: "iPhone / iPad (Safari):",
+                installIosDesc: "Tap the Share icon in the browser bar, then select 'Add to Home Screen'.",
+                installAndroidTitle: "Android (Chrome):",
+                installAndroidDesc: "Tap the browser menu (⋮) at the top, then select 'Install app' or 'Add to Home screen'.",
                 heroBadge: "5s Blitz Auctions • AI Judge • Multiplayer",
                 heroHeadline: "Bid Smart, Build Your Collection & Win!",
                 heroDescription: "4 Project Themes • Equal Budget • AI Judge Rating",
@@ -2056,6 +2140,19 @@
                 this.applyLanguage("ar");
                 this.switchBottomNav("home");
 
+                // Capture PWA install prompt on Android / Chrome / Edge
+                this.deferredInstallPrompt = null;
+                window.addEventListener("beforeinstallprompt", (e) => {
+                    e.preventDefault();
+                    this.deferredInstallPrompt = e;
+                });
+
+                window.addEventListener("appinstalled", () => {
+                    this.deferredInstallPrompt = null;
+                    this.closeInstallModal();
+                    this.showToast(this.lang === "ar" ? "تم تثبيت تطبيق زايد بنجاح! 🎉" : "Zayed app installed successfully! 🎉", "success");
+                });
+
                 // Close 3-dots popover menu when clicking outside
                 document.addEventListener("click", (e) => {
                     const menu = document.getElementById("appDropdownMenu");
@@ -2523,6 +2620,35 @@
 
             closeRulesModal() {
                 const modal = document.getElementById("rulesModal");
+                if (modal) modal.classList.add("hidden");
+            }
+
+            async installAppToHomeScreen() {
+                this.sound.playTick(false);
+                if (this.deferredInstallPrompt) {
+                    this.deferredInstallPrompt.prompt();
+                    const { outcome } = await this.deferredInstallPrompt.userChoice;
+                    if (outcome === "accepted") {
+                        this.deferredInstallPrompt = null;
+                    }
+                    return;
+                }
+
+                const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+                if (isStandalone) {
+                    this.showToast(
+                        this.lang === "ar" ? "التطبيق مثبّت بالفعل على الشاشة الرئيسية! ✅" : "App is already installed on your home screen! ✅",
+                        "info"
+                    );
+                    return;
+                }
+
+                const modal = document.getElementById("installAppModal");
+                if (modal) modal.classList.remove("hidden");
+            }
+
+            closeInstallModal() {
+                const modal = document.getElementById("installAppModal");
                 if (modal) modal.classList.add("hidden");
             }
 
