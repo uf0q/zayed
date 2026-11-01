@@ -1277,47 +1277,53 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL: INSTALL APP TO HOME SCREEN ==================== -->
+    <!-- ==================== MODAL: iOS / PHONE ADD TO HOME SCREEN SHEET ==================== -->
     <div id="installAppModal"
-        class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="glass-panel max-w-sm w-full p-5 space-y-4 text-center" dir="rtl">
-            <div class="flex items-center justify-between border-b border-white/10 pb-3">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-mobile-screen-button text-white"></i>
-                    <span data-i18n="installModalTitle">تثبيت تطبيق زايد على الهاتف</span>
-                </h3>
-                <button onclick="window.app.closeInstallModal()" class="text-[#8e8d8a] hover:text-white text-base">
+        class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-3">
+        <div class="glass-panel max-w-sm w-full p-4 space-y-3.5 text-center border border-white/20 shadow-2xl" dir="rtl">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <img src="zaid.png" alt="زايد" class="w-8 h-8 rounded-xl object-cover border border-white/20">
+                    <div class="text-right">
+                        <h3 class="text-xs font-bold text-white leading-tight" data-i18n="installModalTitle">إضافة تطبيق زايد إلى الصفحة الرئيسية</h3>
+                        <span class="text-[10px] text-[#8e8d8a] font-mono">iPhone / iOS Home Screen</span>
+                    </div>
+                </div>
+                <button onclick="window.app.closeInstallModal()" class="w-7 h-7 rounded-full bg-white/10 text-[#8e8d8a] hover:text-white flex items-center justify-center text-xs">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <div class="flex flex-col items-center gap-2 py-1">
-                <img src="zaid.png" alt="زايد" class="w-20 h-20 rounded-2xl object-cover border border-white/20 shadow-xl">
-                <div class="text-sm font-bold text-white">زايد | ZAYED</div>
-                <p class="text-[11px] text-[#8e8d8a]" data-i18n="installModalSub">ثبّت التطبيق على الشاشة الرئيسية لهاتفك للوصول السريع بكامل الشاشة:</p>
-            </div>
+            <!-- Direct Interactive iOS "Add to Home Screen" Action Option -->
+            <button onclick="window.app.triggerIosHomeScreenShare()"
+                class="w-full p-3.5 rounded-2xl bg-white hover:bg-neutral-200 text-black font-bold text-xs flex items-center justify-between transition active:scale-[0.98] shadow-lg">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center text-sm shrink-0">
+                        <i class="fa-regular fa-square-plus"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-extrabold text-black">إضافة إلى الصفحة الرئيسية</div>
+                        <div class="text-[10px] text-neutral-600 font-medium">Add to Home Screen (iPhone)</div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-arrow-up-from-bracket text-sm text-black me-1"></i>
+            </button>
 
-            <div class="space-y-2 text-right text-xs text-[#8e8d8a]">
-                <div class="p-3 widget-subcard flex items-start gap-2.5">
-                    <i class="fa-brands fa-apple text-white text-base mt-0.5 shrink-0"></i>
-                    <div>
-                        <strong class="text-white block mb-0.5" data-i18n="installIosTitle">لأجهزة iPhone / iPad (سفاري):</strong>
-                        <span data-i18n="installIosDesc">اضغط على أيقونة المشاركة <i class="fa-solid fa-arrow-up-from-bracket text-white mx-0.5"></i> في شريط المتصفح، ثم اختر "إضافة إلى الشاشة الرئيسية".</span>
-                    </div>
+            <!-- Step-by-step visual guide inside the iPhone Share Menu -->
+            <div id="iosInstallHintBox" class="p-3 widget-subcard text-right text-[11px] text-[#8e8d8a] space-y-1.5">
+                <div class="flex items-center gap-2 text-white font-semibold">
+                    <i class="fa-brands fa-apple text-sm"></i>
+                    <span data-i18n="installIosTitle">خطوة التثبيت السريعة للآيفون:</span>
                 </div>
-                <div class="p-3 widget-subcard flex items-start gap-2.5">
-                    <i class="fa-brands fa-android text-emerald-400 text-base mt-0.5 shrink-0"></i>
-                    <div>
-                        <strong class="text-white block mb-0.5" data-i18n="installAndroidTitle">لأجهزة Android (كروم):</strong>
-                        <span data-i18n="installAndroidDesc">اضغط على قائمة المتصفح (⋮) أعلى الشاشة، ثم اختر "تثبيت التطبيق" أو "الإضافة إلى الشاشة الرئيسية".</span>
-                    </div>
-                </div>
+                <p class="leading-relaxed">
+                    من القائمة التي ظهرت لك (أو بالضغط على زر المشاركة <i class="fa-solid fa-arrow-up-from-bracket text-white mx-0.5"></i> بالأسفل)، اختر <strong class="text-white">"إضافة إلى الصفحة الرئيسية" (Add to Home Screen)</strong> ثم اضغط <strong class="text-white">"إضافة"</strong>.
+                </p>
             </div>
 
             <button onclick="window.app.closeInstallModal()"
-                class="w-full py-2.5 rounded-full bg-white hover:bg-neutral-200 text-black font-bold text-xs transition"
-                data-i18n="gotItBtn">
-                فهمت، لنبدأ!
+                class="w-full py-2 rounded-full bg-white/10 hover:bg-white/15 text-white font-semibold text-xs transition">
+                إغلاق
             </button>
         </div>
     </div>
@@ -2645,6 +2651,23 @@
 
                 const modal = document.getElementById("installAppModal");
                 if (modal) modal.classList.remove("hidden");
+
+                // Automatically open the iPhone native Share Sheet (which contains "إضافة إلى الشاشة الرئيسية")
+                await this.triggerIosHomeScreenShare();
+            }
+
+            async triggerIosHomeScreenShare() {
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: "زايد | Zayed",
+                            text: "لعبة المزادات والتقييم",
+                            url: window.location.href
+                        });
+                    } catch (e) {
+                        // User closed share sheet; modal remains visible with option
+                    }
+                }
             }
 
             closeInstallModal() {
