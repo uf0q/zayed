@@ -2,7 +2,7 @@
   "name": "زايد | Zayed - لعبة المزادات والتقييم",
   "short_name": "زايد",
   "description": "لعبة المزادات السريعة والتقييم مع الحكم الذكي",
-  "start_url": "./zayed-10.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b0c0e",
   "theme_color": "#0b0c0e",
